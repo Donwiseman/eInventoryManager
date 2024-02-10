@@ -5,9 +5,20 @@ from database import storage
 from flask_cors import CORS
 from api.v1.views import app_look
 from flask_jwt_extended import JWTManager
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = "super-secret"
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "secret_key")
+
+if os.getenv('DEBUG', 'False') == 'False':
+    app.config["DEBUG"] = False
+else:
+    app.config["DEBUG"] = True
+
+
 #app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 jwt = JWTManager(app)
