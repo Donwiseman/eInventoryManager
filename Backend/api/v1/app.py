@@ -19,7 +19,7 @@ else:
     app.config["DEBUG"] = True
 
 
-#app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)
+# app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 jwt = JWTManager(app)
 app.register_blueprint(app_look)
