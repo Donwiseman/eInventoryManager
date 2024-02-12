@@ -8,13 +8,27 @@ from models.purchases import Purchase
 from models.sales import Sale
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
+
+db_uri = "sqlite:///a.db"
+
+if os.getenv('DEBUG', 'False') == 'False':
+    db_uri =  (
+            "postgresql+psycopg2://" + 
+            f"{os.getenv('DB_USER')}:" +
+            f"{os.getenv('DB_PASSWD')}" +
+            f"@{os.getenv('DB_HOST')}/" +
+            f"{os.getenv('DB_NAME')}")
 
 class Database:
     """Defines the SQL databse ORM"""
 
     def __init__(self) -> None:
-        self.__engine = create_engine("sqlite:///a.db", echo=False)
+        self.__engine = create_engine(db_uri, echo=False)
         Base.metadata.create_all(self.__engine)
         self.__session = None
 

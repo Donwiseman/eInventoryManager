@@ -17,7 +17,9 @@ verified_number = "+2347066041638"
 
 client = Client(account_sid, auth_token)
 
-verification = client.verify.v2.services(verify_sid).verifications.create(to='+2347010744571', channel="sms")
+verification = client.verify.v2.services(
+        verify_sid
+        ).verifications.create(to='+2347010744571', channel="sms")
 print(verification.status)
 
 otp_code = input("Please enter the OTP:")
@@ -45,7 +47,7 @@ print(verification_check.status)
 #     except Exception as e:
 #         print(f'An error occurred: {str(e)}')
 
-    
+
 # def main():
 #     receiver = input('Enter a phone number: \n')
 #     otp = generate_pass()
