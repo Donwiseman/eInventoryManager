@@ -9,14 +9,11 @@ from models.sales import Sale
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 import os
-from dotenv import load_dotenv
 
-
-load_dotenv()
 
 db_uri = "sqlite:///a.db"
 
-if os.getenv('DEBUG', 'False') == 'False':
+if os.getenv('DEBUG') == 'False':
     db_uri =  (
             "postgresql+psycopg2://" + 
             f"{os.getenv('DB_USER')}:" +

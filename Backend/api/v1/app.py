@@ -6,14 +6,12 @@ from flask_cors import CORS
 from api.v1.views import app_look
 from flask_jwt_extended import JWTManager
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "secret_key")
 
-if os.getenv('DEBUG', 'False') == 'False':
+if os.getenv('DEBUG') == 'False':
     app.config["DEBUG"] = False
 else:
     app.config["DEBUG"] = True
