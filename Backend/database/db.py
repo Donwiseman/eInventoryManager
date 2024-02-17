@@ -11,7 +11,8 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 import os
 
 
-db_uri = "sqlite:///a.db"
+#db_uri = "sqlite:///a.db"
+db_uri = "postgresql+psycopg2://inventory:password@localhost:5432/inventorydb"
 
 if os.getenv('DEBUG') == 'False':
     db_uri =  (

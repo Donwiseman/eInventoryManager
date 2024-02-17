@@ -86,6 +86,7 @@ def get_code():
             user.active_token = passW
             user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
             msg = "Verification code expired, new code has been resent"
+            storage.save()
         except SMTPConnectError:
             msg = "Verification code expired but error occurred resending code"
         return jsonify({"message": msg}), 400

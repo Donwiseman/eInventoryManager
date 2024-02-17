@@ -2,7 +2,7 @@
 from . import Base
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, \
-        Table, Boolean
+        Table, Boolean, LargeBinary
 from sqlalchemy.orm import relationship
 import uuid
 from bcrypt import hashpw, gensalt, checkpw
@@ -24,7 +24,7 @@ class User(Base):
     first_name = Column(String(128), nullable=False)
     email = Column(String(128))
     created_at = Column(DateTime, default=datetime.utcnow)
-    hashed_password = Column(String(250), nullable=False)
+    hashed_password = Column(LargeBinary, nullable=False)
     mobile = Column(String(60))
     email_verified = Column(Boolean, default=False)
     mobile_verified = Column(Boolean, default=False)
@@ -55,4 +55,5 @@ class User(Base):
     def validate_password(self, password: str) -> bool:
         """Validates password"""
         pw_bytes = password.encode('utf-8')
-        return checkpw(pw_bytes, self.hashed_password)
+        hashedpw = hashpw(pw_bytes, self.hashed_password)
+        return hashedpw == self.hashed_password
