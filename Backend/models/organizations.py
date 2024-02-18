@@ -20,8 +20,7 @@ class Organization(Base):
     mobile = Column(String(60))
     image = Column(String(512))
     creator = relationship("User", back_populates='org_created')
-    users = relationship("User", secondary='org_user_association',
-                         viewonly=False, back_populates="organizations")
+    user_associations = relationship("OrgUserAssociation", back_populates="organization")
     categories = relationship("Category", back_populates="organization")
     items = relationship("Item", back_populates="organization")
     purchases = relationship("Purchase", back_populates="organization")
@@ -82,3 +81,10 @@ class Organization(Base):
         storage.add(category)
         storage.save()
         return category
+
+    def get_user_role(self, user_id):
+        """Gets the role of a given user within the organization"""
+        for asso in self.user_associations:
+            if asso.user_id == user_id:
+                return asso.user_role
+        return "Not a user within this organization"

@@ -2,6 +2,7 @@
 from models import Base
 from models.users import User
 from models.organizations import Organization
+from models.association import OrgUserAssociation
 from models.items import Item
 from models.categories import Category
 from models.purchases import Purchase
@@ -11,8 +12,8 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 import os
 
 
-#db_uri = "sqlite:///a.db"
-db_uri = "postgresql+psycopg2://inventory:password@localhost:5432/inventorydb"
+db_uri = "sqlite:///a.db"
+#db_uri = "postgresql+psycopg2://inventory:password@localhost:5432/inventorydb"
 
 if os.getenv('DEBUG') == 'False':
     db_uri =  (
@@ -72,7 +73,8 @@ class Database:
         user = self.get_user_by_id(kwargs.get("user_id"))
         org = Organization(**kwargs)
         self.__session.add(org)
-        user.organizations.append(org, {'user_role': "Admin"})
+        asso = OrgUserAssociation(org.id, user.id, "Admin")
+        self.__session.add(asso)
         self.__session.commit()
         return org
 
