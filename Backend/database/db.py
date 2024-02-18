@@ -12,16 +12,17 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 import os
 
 
-#db_uri = "sqlite:///a.db"
+# db_uri = "sqlite:///a.db"
 db_uri = "postgresql+psycopg2://inventory:password@localhost:5432/inventorydb"
 
 if os.getenv('DEBUG') == 'False':
-    db_uri =  (
-            "postgresql+psycopg2://" + 
+    db_uri = (
+            "postgresql+psycopg2://" +
             f"{os.getenv('DB_USER')}:" +
             f"{os.getenv('DB_PASSWD')}" +
             f"@{os.getenv('DB_HOST')}/" +
             f"{os.getenv('DB_NAME')}")
+
 
 class Database:
     """Defines the SQL databse ORM"""
