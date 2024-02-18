@@ -4,11 +4,12 @@ from api.v1.views import app_look
 from emailVerification import Email
 from database import storage
 from datetime import datetime, timedelta
-from flask_jwt_extended import create_access_token, get_jwt_identity,\
+from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
 from smtplib import SMTPConnectError
 
 Mail = Email()
+
 
 @app_look.route('/signup', methods=['POST'], strict_slashes=False)
 def reg_users():
@@ -39,7 +40,7 @@ def reg_users():
     access_token = create_access_token(identity=new_user.id)
     storage.save()
     org = []
-    for asso in user.org_associations:
+    for asso in new_user.org_associations:
         organization = storage.get_org_by_id(asso.org_id)
         org_detail = {
             "name": organization.name,
@@ -87,7 +88,7 @@ def login():
         "organization": org
     }
     return jsonify(resp), 200
-    
+
 
 @app_look.route('/verify', methods=['POST'], strict_slashes=False)
 @jwt_required()
