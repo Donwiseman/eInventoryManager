@@ -94,8 +94,9 @@ def login():
 @jwt_required()
 def get_code():
     """Gets the verification code"""
-    user_id = get_jwt_identity()
     code = request.form.get('code')
+
+    user_id = get_jwt_identity()
     if not user_id:
         return jsonify({"message": "Invalid JSON token"}), 400
     user = storage.get_user_by_id(user_id)
