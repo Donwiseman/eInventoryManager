@@ -5,7 +5,7 @@ from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 import uuid
 
-              
+
 class OrgUserAssociation(Base):
     """Creates an association object between Users and Organizations"""
     __tablename__ = "org_user_association"

@@ -20,7 +20,8 @@ class Organization(Base):
     mobile = Column(String(60))
     image = Column(String(512))
     creator = relationship("User", back_populates='org_created')
-    user_associations = relationship("OrgUserAssociation", back_populates="organization")
+    user_associations = relationship("OrgUserAssociation",
+                                     back_populates="organization")
     categories = relationship("Category", back_populates="organization")
     items = relationship("Item", back_populates="organization")
     purchases = relationship("Purchase", back_populates="organization")

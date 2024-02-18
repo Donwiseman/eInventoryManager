@@ -23,7 +23,8 @@ class User(Base):
     active_token = Column(String(128))
     token_expiry = Column(DateTime)
     image = Column(String(512))
-    org_associations = relationship("OrgUserAssociation", back_populates="user")
+    org_associations = relationship("OrgUserAssociation",
+                                    back_populates="user")
     org_created = relationship('Organization', back_populates='creator')
 
     def __init__(self, **kwargs):
