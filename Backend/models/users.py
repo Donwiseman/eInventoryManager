@@ -2,18 +2,10 @@
 from . import Base
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, \
-        Table, Boolean
+        Table, Boolean, LargeBinary
 from sqlalchemy.orm import relationship
 import uuid
 from bcrypt import hashpw, gensalt, checkpw
-
-
-org_user_association = Table('org_user_association', Base.metadata,
-                             Column('organization_id', String(60),
-                                    ForeignKey('organizations.id')),
-                             Column('user_id', String(60),
-                                    ForeignKey('users.id')),
-                             Column('user_role', String(60)))
 
 
 class User(Base):
@@ -24,16 +16,15 @@ class User(Base):
     first_name = Column(String(128), nullable=False)
     email = Column(String(128))
     created_at = Column(DateTime, default=datetime.utcnow)
-    hashed_password = Column(String(250), nullable=False)
+    hashed_password = Column(LargeBinary, nullable=False)
     mobile = Column(String(60))
     email_verified = Column(Boolean, default=False)
     mobile_verified = Column(Boolean, default=False)
     active_token = Column(String(128))
     token_expiry = Column(DateTime)
     image = Column(String(512))
-    organizations = relationship("Organization",
-                                 secondary='org_user_association',
-                                 viewonly=False, back_populates="users")
+    org_associations = relationship("OrgUserAssociation",
+                                    back_populates="user")
     org_created = relationship('Organization', back_populates='creator')
 
     def __init__(self, **kwargs):

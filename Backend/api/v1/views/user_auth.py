@@ -4,11 +4,12 @@ from api.v1.views import app_look
 from emailVerification import Email
 from database import storage
 from datetime import datetime, timedelta
-from flask_jwt_extended import create_access_token, get_jwt_identity,\
+from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
 from smtplib import SMTPConnectError
 
 Mail = Email()
+
 
 @app_look.route('/signup', methods=['POST'], strict_slashes=False)
 def reg_users():
@@ -38,11 +39,22 @@ def reg_users():
         message = "Signup successful but verification email could not be sent"
     access_token = create_access_token(identity=new_user.id)
     storage.save()
+    org = []
+    for asso in new_user.org_associations:
+        organization = storage.get_org_by_id(asso.org_id)
+        org_detail = {
+            "name": organization.name,
+            "id": organization.id,
+            "user_role": organization.get_user_role(new_user.id)
+        }
+        org.append(org_detail)
     resp = {
         'message': message,
         "jwt": access_token,
         "fullName": f"{new_user.first_name} {new_user.last_name}",
-        "organization": new_user.organizations,
+        "email_verified": new_user.email_verified,
+        "mobile_verified": new_user.mobile_verified,
+        "organization": org
     }
     return jsonify(resp), 200
 
@@ -58,16 +70,27 @@ def login():
     if not user.validate_password(password):
         return jsonify({'message': "Wrong password"}), 401
     access_token = create_access_token(identity=user.id)
+    org = []
+    for asso in user.org_associations:
+        organization = storage.get_org_by_id(asso.org_id)
+        org_detail = {
+            "name": organization.name,
+            "id": organization.id,
+            "user_role": organization.get_user_role(user.id)
+        }
+        org.append(org_detail)
     resp = {
         'message': "Login Succesful",
         "jwt": access_token,
         "fullName": f"{user.first_name} {user.last_name}",
-        "organization": user.organizations,
+        "email_verified": user.email_verified,
+        "mobile_verified": user.mobile_verified,
+        "organization": org
     }
     return jsonify(resp), 200
-    
 
-@app_look.route('/verify-code', methods=['POST'], strict_slashes=False)
+
+@app_look.route('/verify', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def get_code():
     """Gets the verification code"""
@@ -75,10 +98,10 @@ def get_code():
 
     user_id = get_jwt_identity()
     if not user_id:
-        return jsonify({"message": "Invalid token"}), 400
+        return jsonify({"message": "Invalid JSON token"}), 400
     user = storage.get_user_by_id(user_id)
     if not user:
-        return jsonify({"message": "Invalid token claims"}), 400
+        return jsonify({"message": "Invalid JSON token claims"}), 400
     if user.token_expiry < datetime.utcnow():
         try:
             passW = Mail.generate_password()
@@ -86,6 +109,7 @@ def get_code():
             user.active_token = passW
             user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
             msg = "Verification code expired, new code has been resent"
+            storage.save()
         except SMTPConnectError:
             msg = "Verification code expired but error occurred resending code"
         return jsonify({"message": msg}), 400
@@ -96,3 +120,26 @@ def get_code():
     user.token_expiry = None
     storage.save()
     return jsonify({"message": "Email Verified"}), 200
+
+
+@app_look.route('/resend', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def send_code():
+    """Resends the verification code"""
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid JSON token"}), 400
+    user = storage.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message": "Invalid JSON token claims"}), 400
+    user = storage.get_user_by_id(user_id)
+    try:
+        passW = Mail.generate_password()
+        Mail.send_mail(user.email, passW)
+        user.active_token = passW
+        user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
+        msg = "Verification code has been sent"
+        storage.save()
+    except SMTPConnectError:
+        msg = "Error occurred sending verification code"
+    return jsonify(msg)
