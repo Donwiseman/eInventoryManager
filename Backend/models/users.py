@@ -47,3 +47,9 @@ class User(Base):
         """Validates password"""
         pw_bytes = password.encode('utf-8')
         return checkpw(pw_bytes, self.hashed_password)
+    
+    def set_password(self, password: str):
+        """Sets a new user password"""
+        from database import storage
+        self.hashed_password = self.__hash_password(password)
+        storage.save()
