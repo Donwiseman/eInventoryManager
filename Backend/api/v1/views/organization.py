@@ -22,7 +22,7 @@ def supported_Countries():
         except KeyError:
             timezones = []
         country_data = {
-            "name": country,
+            "country": country,
             "timezones": timezones
         }
         countries.append(country_data)

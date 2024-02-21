@@ -125,6 +125,27 @@ This is the Backend application which manages the business logic and database of
 
 ### ORGANIZATION RESOURCE API
 
+#### api/v1/countries
+- This sends all supported countries and their timezoones
+- **Methods**: GET
+- **AUTHENTICATION**: JWT
+        * GET DETAILS:
+            + NO REQUIRED FIELDS
+        * JSON RESPONSE
+        ```
+        [
+            {
+                "country": "Nigeria",
+                "timezones": ["Africa/Lagos"]
+            },
+            {
+                "country": "Ghana",
+                "timezones": ["Africa/Accra"]
+            },
+            ...
+        ]
+        ```
+
 #### api/v1/organization
 - This handles method calls to the organization resorce
 - **Methods**: GET, POST, PUT, DELETE
