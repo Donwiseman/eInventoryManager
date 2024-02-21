@@ -28,7 +28,7 @@ def user():
                 "id": organization.id,
                 "user_role": organization.get_user_role(user.id)
             }
-        org.append(org_detail)
+            org.append(org_detail)
         created_org = []
         for organization in user.org_created:
             org_detail = {
