@@ -20,6 +20,8 @@ class Organization(Base):
     time_zone = Column(String(128), nullable=False)
     mobile = Column(String(60))
     mobile_verified = Column(Boolean, default=False)
+    active_token = Column(String(128))
+    token_expiry = Column(DateTime)
     image = Column(String(512))
     creator = relationship("User", back_populates='org_created')
     user_associations = relationship("OrgUserAssociation",
