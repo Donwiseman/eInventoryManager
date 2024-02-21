@@ -90,6 +90,34 @@ def login():
     return jsonify(resp), 200
 
 
+@app_look.route('/reset', methods=['POST'], strict_slashes=False)
+def password_reset():
+    """Resets a given user password with valid token"""
+    email = request.form.get('email')
+    code = request.form.get('code')
+    passowrd = request.form.get('password')
+    user = storage.get_user_by_email(email)
+    if not user:
+        return jsonify({"message": "email does not belong to any user"})
+    if user.token_expiry < datetime.utcnow():
+        try:
+            passW = Mail.generate_password()
+            Mail.send_mail(user.email, passW)
+            user.active_token = passW
+            user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
+            msg = "Verification code expired, new code has been resent"
+            storage.save()
+        except SMTPConnectError:
+            msg = "Verification code expired but error occurred resending code"
+        return jsonify({"message": msg}), 400
+    if code != user.active_token:
+        return jsonify({"message": "Wrong verification code"}), 400
+    user.set_password(passowrd)
+    user.token_expiry = None
+    user.active_token = None
+    return jsonify({"message": "User password has been updated"})
+
+
 @app_look.route('/verify', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def get_code():
@@ -98,10 +126,12 @@ def get_code():
 
     user_id = get_jwt_identity()
     if not user_id:
-        return jsonify({"message": "Invalid JSON token"}), 400
+        return jsonify({"message": "Invalid JSON token"}), 401
     user = storage.get_user_by_id(user_id)
     if not user:
-        return jsonify({"message": "Invalid JSON token claims"}), 400
+        return jsonify({"message": "Invalid JSON token claims"}), 401
+    if user.email_verified:
+        return jsonify({"message": "User email is already verified"}), 400
     if user.token_expiry < datetime.utcnow():
         try:
             passW = Mail.generate_password()
@@ -122,17 +152,15 @@ def get_code():
     return jsonify({"message": "Email Verified"}), 200
 
 
-@app_look.route('/resend', methods=['GET'], strict_slashes=False)
-@jwt_required()
+@app_look.route('/token', methods=['POST'], strict_slashes=False)
 def send_code():
     """Resends the verification code"""
-    user_id = get_jwt_identity()
-    if not user_id:
-        return jsonify({"message": "Invalid JSON token"}), 400
-    user = storage.get_user_by_id(user_id)
+    email = request.form.get('email')
+    if not email:
+        return jsonify({"message": "Email details not sent"}), 400
+    user = storage.get_user_by_email(email)
     if not user:
-        return jsonify({"message": "Invalid JSON token claims"}), 400
-    user = storage.get_user_by_id(user_id)
+        return jsonify({"message": "Email does not belong to any user"}), 400
     try:
         passW = Mail.generate_password()
         Mail.send_mail(user.email, passW)
