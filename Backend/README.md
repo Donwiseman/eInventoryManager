@@ -1,10 +1,10 @@
-#### GO Inventory Manager Backend Application
+# GO Inventory Manager Backend Application
 This is the Backend application which manages the business logic and database of the application.
-#### API DOCUMENTATION
+## API DOCUMENTATION
 
 ### AUTHENTICATION RELATED ENDPOINTS
 
-## api/v1/signup
+#### api/v1/signup
 - This recieves required fields to register a new user
 - **Methods**: POST
 - **AUTHENTICATION**: NOT REQUIRED
@@ -33,7 +33,7 @@ This is the Backend application which manages the business logic and database of
     }
     ```
 
-## api/v1/login
+#### api/v1/login
 - This endpoint handles user login returning user details and JWT authentication
 - **Methods**: POST
 - **AUTHENTICATION**: NOT REQUIRED
@@ -59,7 +59,7 @@ This is the Backend application which manages the business logic and database of
     }
     ```
 
-## api/v1/token
+#### api/v1/token
 - This endpoint sends a 6 digit verification code to the user
 - **Methods**: POST
 - **AUTHENTICATION**: NOT REQUIRED
@@ -73,7 +73,7 @@ This is the Backend application which manages the business logic and database of
     }
     ```
 
-## api/v1/reset
+#### api/v1/reset
 - This resets a user password after authentication with the token sent to their respective email
 - **Methods**: POST
 - **AUTHENTICATION**: NOT REQUIRED
@@ -89,7 +89,7 @@ This is the Backend application which manages the business logic and database of
     }
     ```
 
-## api/v1/verify
+#### api/v1/verify
 - This verifies that user given email is valid via code sent to user email
 - **Methods**: POST
 - **AUTHENTICATION**: JWT
