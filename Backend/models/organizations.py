@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import Column, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 import uuid
+import pytz
 
 
 class Organization(Base):
@@ -49,7 +50,7 @@ class Organization(Base):
         new_item = Item(**kwargs)
         storage.add(new_item)
         trans = {
-            "date": datetime.utcnow(),
+            "date": self.get_local_time(),
             "user_name": kwargs.get("user_name"),
             "organization_id": self.id,
             "item_id": new_item.id,
@@ -90,3 +91,9 @@ class Organization(Base):
             if asso.user_id == user_id:
                 return asso.user_role
         return "Not a user within this organization"
+    
+    def get_local_time(self) -> datetime:
+        """Returns the current local time used by the organization"""
+        desired_tz = pytz.timezone(self.time_zone)
+        date_now = datetime.utcnow()
+        return date_now.replace(tzinfo=pytz.utc).astimezone(desired_tz)

@@ -57,10 +57,6 @@ class Database:
         self.__session.commit()
         return new_user
 
-    def get_all_user(self):
-        """Returns all users"""
-        return self.__session.query(User).all()
-
     def get_user_by_id(self, user_id: str) -> User:
         """returns a user based on the id"""
         user = self.__session.query(User).filter(User.id == user_id).all()
