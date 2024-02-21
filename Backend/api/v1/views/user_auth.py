@@ -54,7 +54,7 @@ def reg_users():
         "fullName": f"{new_user.first_name} {new_user.last_name}",
         "email_verified": new_user.email_verified,
         "mobile_verified": new_user.mobile_verified,
-        "organization": org
+        "organizations": org
     }
     return jsonify(resp), 200
 
@@ -85,7 +85,7 @@ def login():
         "fullName": f"{user.first_name} {user.last_name}",
         "email_verified": user.email_verified,
         "mobile_verified": user.mobile_verified,
-        "organization": org
+        "organizations": org
     }
     return jsonify(resp), 200
 
