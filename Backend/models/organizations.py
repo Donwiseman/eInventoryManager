@@ -1,7 +1,7 @@
 """This defines the Organization class and it's mappingss to the DB"""
 from . import Base
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -18,6 +18,7 @@ class Organization(Base):
     description = Column(String(128))
     time_zone = Column(String(128), nullable=False)
     mobile = Column(String(60))
+    mobile_verified = Column(Boolean, default=False)
     image = Column(String(512))
     creator = relationship("User", back_populates='org_created')
     user_associations = relationship("OrgUserAssociation",
@@ -30,14 +31,14 @@ class Organization(Base):
     def __init__(self, **kwargs):
         """Initializes the class"""
         self.id = str(uuid.uuid4())
-        self.name = kwargs.get("name", None)
-        self.country = kwargs.get("country", None)
-        self.address = kwargs.get("address", None)
-        self.creator_id = kwargs.get("user_id", None)
-        self.description = kwargs.get("description", None)
-        self.time_zone = kwargs.get("timezone", None)
-        self.mobile = kwargs.get("mobile", None)
-        self.image = kwargs.get("image", None)
+        self.name = kwargs.get("name")
+        self.country = kwargs.get("country")
+        self.address = kwargs.get("address")
+        self.creator_id = kwargs.get("user_id")
+        self.description = kwargs.get("description")
+        self.time_zone = kwargs.get("timezone")
+        self.mobile = kwargs.get("mobile")
+        self.image = kwargs.get("image")
 
     def create_item(self, **kwargs):
         """Adds an item to the inventory"""

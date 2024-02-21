@@ -23,13 +23,7 @@ This is the Backend application which manages the business logic and database of
         "jwt":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwODQ5MTc0OCwianRpIjoiMWRlOThkNzctZDI3Yy00MjRkLWEwYzgtNGQ3OTAyN2VkYjViIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjE2MzJmMWZiLTFhNDYtNGU5Yy1hZDI5LTcyNzczYzA2MzNkMyIsIm5iZiI6MTcwODQ5MTc0OCwiY3NyZiI6IjIyODlhMzNhLTE2MTMtNDY4Ni05ZmYyLWJiNDhjM2JkYmNhNiIsImV4cCI6MTcwODQ5MjY0OH0._zQECRA-SvMzRKlCKRDPF2FA1vZuOAK4Wo3sLXByn4I",
         "message":"Signup successful. Verification email sent",
         "mobile_verified":false,
-        "organization":[
-            {
-                "name": "My Company",
-                "id": "f562dcf9-c267-4c4f-83d9-626f96d9e998".
-                "user_role": "Admin"
-            }
-        ]
+        "organization":[]
     }
     ```
 
@@ -102,3 +96,56 @@ This is the Backend application which manages the business logic and database of
         "message": "message": "Email Verified"
     }
     ```
+
+
+### USER RESOURCE API
+
+#### api/v1/user
+- This endpoint handles manipulation of the given user data
+- **Methods**: GET, PUT
+- **AUTHENTICATION**: JWT
+    * GET DETAILS:
+        + NO REQUIRED FIELD
+        + JSON RESPONSE:
+        ```
+        {
+            "first_name": "Emmanuel",
+            "last_name": "Adaja",
+            "email": "emmanueladaja@yahoo.com",
+            "email_verified":true,
+            "mobile": <phone number>,
+            "mobile_verified":false,
+            "organizations": [],
+            "created_at": <datetime data>,
+            "organizations_created": []
+        }
+        ```
+    * Other method not implemented
+
+
+### ORGANIZATION RESOURCE API
+
+#### api/v1/organization
+- This handles method calls to the organization resorce
+- **Methods**: GET, POST, PUT, DELETE
+- **AUTHENTICATION**: JWT
+    * POST DETAILS:
+        + REQUIRED FORM FIELDS:
+            - name
+            - country
+            - timezone
+            - description (optional)
+            - mobile (optional)
+            - address (optional)
+            - image (optional)
+        + JSON RESPONSE:
+        ```
+        {
+            "message": "Organization succesfully created",
+            "name": "My Comapny",
+            "id": "f562dcf9-c267-4c4f-83d9-626f96d9e998",
+            "created_at": <datetime data>,
+            "image": <url link>,
+            "country": "Nigeria"
+        }
+    * Other methods yet to be implemented
