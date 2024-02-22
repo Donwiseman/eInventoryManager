@@ -19,6 +19,7 @@ import { signupAction } from '@/actions/signup'
 import FormError from '@/components/others/form-error'
 import FormSuccess from '@/components/others/form-success'
 import CardWrapper from './card-warpper'
+import { login } from '@/components/urls'
 
 
 export default function SignupForm () {
@@ -40,8 +41,8 @@ export default function SignupForm () {
         setResSuccessMessage('')
         startTransition(async () => {
             const res = await signupAction(values)
-            if (res.success) setResSuccessMessage(res.success)
-            else if (res.error) setResErrorMessage(res.error)
+            if (res?.success) setResSuccessMessage(res.success)
+            else if (res?.error) setResErrorMessage(res.error)
             else setResErrorMessage('There was an error signing you up. Try again in a few minutes')
         })
     }
@@ -50,7 +51,7 @@ export default function SignupForm () {
         <CardWrapper
             title='Sign up'
             description='Enter credentials below and click the sign up button.'
-            backButtonHref='/login'
+            backButtonHref= {login}
             backButtonLabel='Already have an account? Login'
         >
             <Form {...form}>

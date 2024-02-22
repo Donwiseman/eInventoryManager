@@ -12,11 +12,14 @@ import {
  } from "react-icons/io";
 import { GoCheckCircle } from 'react-icons/go'
 import { PiNotepad } from 'react-icons/pi'
-import { TiShoppingCart } from 'react-icons/Ti'
+import { TiShoppingCart } from 'react-icons/ti'
 import { FaRegStar as StarIcon } from "react-icons/fa6";
 import heroImage from '@/assets/images/heroImage.png'
 import Image from "next/image";
 import AuthPopup from "@/components/others/auth-popup";
+
+import { login, signup, home } from '@/components/urls';
+
 import PublicNavbar from "@/components/others/public-navbar";
 import PublicFooter from "@/components/others/public-footer";
 
@@ -30,9 +33,6 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen">
-      <div className="w-full sticky top-0 left-0">
-        <PublicNavbar />
-      </div>
       <div className="space-y-20">
         <div className="md:flex justify-center space-y-10 md:space-x-12 items-center pl-4 md:pl-16">
           <div className="md:w-4/5 md:pl-12 space-y-3">
@@ -42,7 +42,7 @@ export default function Home() {
               You can do it walking. You can do it travelling.
               You can do it on go
             </p>
-            <Link href='/sign-up' className="text-white block w-max font-medium px-6 py-2 rounded-full bg-green-600">Get started</Link>
+            <Link href={signup} className="text-white block w-max font-medium px-6 py-2 rounded-full bg-green-600">Get started</Link>
           </div>
           <div className="md:w-3/5 md:pr-0 pr-4">
               <Image src={heroImage} alt='hero image' className='md:w-3/5'/>
@@ -76,10 +76,10 @@ export default function Home() {
               </div>
               <div className="flex flex-col md:flex-row gap-4 pt-4">
                 <div className="bg-green-600 hover:bg-green-400 hover:cursor-pointer rounded-full w-full text-center px-8 py-1.5 text-white">
-                  <AuthPopup type="login" title='Login to your account'/>
+                  <Link href={login}>Login to your account</Link>
                 </div>
                 <div className="border-2 border-green-600 hover:cursor-pointer text-green-600 hover:border-green-400 w-full text-center rounded-full px-8 py-1.5">
-                  <AuthPopup type="signup" title='Sign up for free'/>
+                  <Link href={signup}>Sign up for free</Link>
                 </div>
               </div>
             </div>
@@ -147,9 +147,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
-      <div>
-        <PublicFooter />
       </div>
     </main>
   );

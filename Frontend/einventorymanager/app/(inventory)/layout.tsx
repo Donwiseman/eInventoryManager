@@ -1,4 +1,4 @@
-import Dashboard from "@/components/organization/dashboard";
+//import Dashboard from "@/components/organization/dashboard";
 import Navbar from "@/components/others/navbar";
 import Sidebar from "@/components/others/sidebar";
 import React from "react";

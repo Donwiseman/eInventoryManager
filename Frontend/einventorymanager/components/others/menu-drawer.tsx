@@ -10,6 +10,7 @@ import { HiOutlineHome as HomeIcon } from "react-icons/hi";
 import { MdOutlineInfo as AboutUsIcon } from "react-icons/md";
 import { TbBrandStorytel as OurStoryIcon } from "react-icons/tb";
 import { LuPhone as ContactUsIcon } from "react-icons/lu";
+import { CiLogin as LoginIcon } from "react-icons/ci";
 
 
 export default function MenuDrawer () {
@@ -33,6 +34,11 @@ export default function MenuDrawer () {
                 <Link href='/contact-us' className="flex gap-3 items-center">
                     <ContactUsIcon className="text-xl"/>
                     <h1 className=" text-gray-800 hover:text-green-600 transition-colors duration-300">Contact us</h1>
+                </Link>
+                <Link href='/login' className="flex gap-3 items-center">
+                  <LoginIcon className="text-2xl text-green-900"/>
+                  <h1 className="py-1.5 text-green-900">Login</h1>
+                  
                 </Link>
             </div>
             <DrawerFooter>

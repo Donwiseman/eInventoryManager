@@ -22,7 +22,7 @@ function AuthPopup(
   {type, title}: AuthPopupProps
 ) {
   return (
-    <div>
+    <>
       <AlertDialog>
         <AlertDialogTrigger>{title}</AlertDialogTrigger>
         <AlertDialogContent>
@@ -36,7 +36,7 @@ function AuthPopup(
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   )
 }
 
