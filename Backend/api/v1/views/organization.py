@@ -29,10 +29,12 @@ def supported_Countries():
     return jsonify(countries)
 
 
-@app_look.route('/organization', methods=['GET', 'POST', 'PUT', 'DELETE'], strict_slashes=False)
+@app_look.route('/organizations', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def organization():
-    """Handles the resource for each organization"""
+    """Handles the creating an organization by the user and retrieving
+       list of those they belong to
+    """
     user_id = get_jwt_identity()
     if not user_id:
         return jsonify({"message": "Invalid JSON token"}), 401
@@ -64,4 +66,19 @@ def organization():
             "country": org.country
         }
         return jsonify(resp)
-    return jsonify({"message": "Not yet implemented"})
+
+    if request.method == "GET":
+        org = []
+        for asso in user.org_associations:
+            organization = storage.get_org_by_id(asso.org_id)
+            org_detail = {
+                "name": organization.name,
+                "id": organization.id,
+                "user_role": organization.get_user_role(user.id)
+            }
+            org.append(org_detail)
+        resp = {
+            "message": "Returning user organizations",
+            "organizations": org
+        }
+        return jsonify(resp)

@@ -26,8 +26,7 @@ class Item(Base):
     organization_id = Column(String(128), ForeignKey("organizations.id"),
                              nullable=False)
     obsolete = Column(Boolean, default=False)
-    organization = relationship("Organization", back_populates="items",
-                                cascade="delete")
+    organization = relationship("Organization", back_populates="items")
     category = relationship("Category", back_populates="items")
     purchase_history = relationship("Purchase", back_populates="item")
     sale_history = relationship("Sale", back_populates="item")

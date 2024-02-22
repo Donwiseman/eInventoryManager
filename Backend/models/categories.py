@@ -15,8 +15,7 @@ class Category(Base):
     description = Column(String(128))
     organization_id = Column(String(128), ForeignKey("organizations.id"),
                              nullable=False)
-    organization = relationship("Organization", back_populates="categories",
-                                cascade="delete")
+    organization = relationship("Organization", back_populates="categories")
     items = relationship("Item", back_populates="category")
 
     def __init__(self, **kwargs):

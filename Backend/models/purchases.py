@@ -20,8 +20,7 @@ class Purchase(Base):
     purchase_cost = Column(Float, nullable=False)
     total_items_in_store = Column(Integer)
     details = Column(String(256))
-    organization = relationship("Organization", back_populates="purchases",
-                                cascade="delete")
+    organization = relationship("Organization", back_populates="purchases")
     item = relationship("Item", back_populates="purchase_history")
 
     def __init__(self, **kwargs):

@@ -3,9 +3,8 @@ from api.v1.views import app_look
 from emailVerification import Email
 from database import storage
 from datetime import datetime, timedelta
-from flask_jwt_extended import create_access_token, get_jwt_identity, \
-    jwt_required
-from smtplib import SMTPConnectError
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from smtplib import SMTPConnectError, SMTPRecipientsRefused
 
 
 @app_look.route('/user', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
@@ -38,6 +37,7 @@ def user():
             }
             created_org.append(org_detail)
         user_dict = {
+            "id": user.id,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
@@ -49,5 +49,41 @@ def user():
             "organizations_created": created_org
         }
         return jsonify(user_dict)
-    return jsonify({"message": "Not yet implemented"})
-    # if request.method == "PUT":
+
+    if request.method == "PUT":
+        msg = []
+        email = request.form.get('email')
+        mobile = request.form.get('mobile')
+        first_name = request.form.get('firstName')
+        last_name = request.form.get('lastName')
+        if email:
+            mail = Email()
+            try:
+                code = mail.generate_password()
+                mail.send_mail(email, code)
+                mesg = "Email updated and verification code sent"
+            except SMTPConnectError:
+                mesg = "Email updated but verification code could not be sent"
+            except SMTPRecipientsRefused:
+                return jsonify({"message": "Update failed, email is invalid"})\
+                    , 400
+            user.active_token = code
+            user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
+            user.email_verified = False
+            msg.append(mesg)
+        if mobile:
+            user.mobile = mobile
+            msg.append("Mobile number updated")
+        if first_name:
+            user.first_name = first_name
+            msg.append("First name updated")
+        if last_name:
+            user.last_name =last_name
+            msg.append("Last name updated")
+        storage.save()
+        return jsonify({"message": ", ".join(msg)})
+
+    if request.method == 'DELETE':
+        storage.delete(user)
+        storage.save()
+        return jsonify({"message": "User account has been deleted"})

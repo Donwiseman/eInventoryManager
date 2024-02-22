@@ -20,8 +20,7 @@ class Sale(Base):
     sale_total = Column(Float, nullable=False)
     items_left = Column(Integer)
     details = Column(String(256))
-    organization = relationship("Organization", back_populates="sales",
-                                cascade="delete")
+    organization = relationship("Organization", back_populates="sales")
     item = relationship("Item", back_populates="sale_history")
 
     def __init__(self, **kwargs):

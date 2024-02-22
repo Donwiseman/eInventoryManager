@@ -24,7 +24,7 @@ class User(Base):
     token_expiry = Column(DateTime)
     image = Column(String(512))
     org_associations = relationship("OrgUserAssociation",
-                                    back_populates="user")
+                                    back_populates="user", cascade='delete')
     org_created = relationship('Organization', back_populates='creator')
 
     def __init__(self, **kwargs):
