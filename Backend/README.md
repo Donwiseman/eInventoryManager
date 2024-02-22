@@ -102,9 +102,9 @@ This is the Backend application which manages the business logic and database of
 
 #### api/v1/user
 - This endpoint handles manipulation of the given user data
-- **Methods**: GET, PUT
+- **Methods**: GET, PUT, DELETE
 - **AUTHENTICATION**: JWT
-    * GET DETAILS:
+    * GET Details:
         + NO REQUIRED FIELD
         + JSON RESPONSE:
         ```
@@ -120,7 +120,26 @@ This is the Backend application which manages the business logic and database of
             "organizations_created": []
         }
         ```
-    * Other method not implemented
+    * PUT Details:
+        + FORM FIELDS:
+            - email
+            - firstName
+            - lastName
+            - mobile
+        + JSON RESPONSE
+        ```
+        {
+            "message": "Email updated and verification code sent, Mobile number updated"
+        }
+        ```
+    * DELETE Details
+        + NO REQUIRED DATA
+        + JSON RESPONSE
+        ```
+        {
+            "message": "User account has been deleted"
+        }
+        ```
 
 
 ### ORGANIZATION RESOURCE API
@@ -129,9 +148,9 @@ This is the Backend application which manages the business logic and database of
 - This sends all supported countries and their timezoones
 - **Methods**: GET
 - **AUTHENTICATION**: JWT
-        * GET DETAILS:
-            + NO REQUIRED FIELDS
-        * JSON RESPONSE
+    * GET DETAILS:
+        + NO REQUIRED FIELDS
+        + JSON RESPONSE
         ```
         [
             {
@@ -146,9 +165,9 @@ This is the Backend application which manages the business logic and database of
         ]
         ```
 
-#### api/v1/organization
-- This handles method calls to the organization resorce
-- **Methods**: GET, POST, PUT, DELETE
+#### api/v1/organizations
+- This allows creation of an organization and returns organizations user belong to
+- **Methods**: GET, POST
 - **AUTHENTICATION**: JWT
     * POST DETAILS:
         + REQUIRED FORM FIELDS:
@@ -169,4 +188,18 @@ This is the Backend application which manages the business logic and database of
             "image": <url link>,
             "country": "Nigeria"
         }
-    * Other methods yet to be implemented
+    * GET Details:
+        + NO REQUIRED FIELDS
+        + JSON RESPONSE
+        ```
+        {
+            "message":"Returning user organizations",
+            "organizations":[
+                {
+                    "id":"d19dba13-2845-4564-8224-bf7983a2e873",
+                    "name":"My Company",
+                    "user_role":"Admin"
+                }, ...
+            ]
+        }
+        ```

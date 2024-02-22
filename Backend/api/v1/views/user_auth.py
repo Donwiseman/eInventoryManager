@@ -21,7 +21,6 @@ def reg_users():
         "password": request.form.get('password'),
         "mobile": request.form.get('mobile')
     }
-    print(kwargs)
 
     if kwargs["email"] is None or kwargs["password"] is None or\
             kwargs['first_name'] is None or kwargs['last_name'] is None:
