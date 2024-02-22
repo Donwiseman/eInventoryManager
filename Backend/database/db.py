@@ -50,6 +50,10 @@ class Database:
         """Saves all saved transaction"""
         self.__session.commit()
 
+    def delete(self, obj: object):
+        """Deletes the obj from storage"""
+        self.__session.delete(obj)
+
     def register_user(self, **kwargs):
         """Registers a user to the database."""
         new_user = User(**kwargs)

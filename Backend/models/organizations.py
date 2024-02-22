@@ -25,11 +25,16 @@ class Organization(Base):
     image = Column(String(512))
     creator = relationship("User", back_populates='org_created')
     user_associations = relationship("OrgUserAssociation",
-                                     back_populates="organization")
-    categories = relationship("Category", back_populates="organization")
-    items = relationship("Item", back_populates="organization")
-    purchases = relationship("Purchase", back_populates="organization")
-    sales = relationship("Sale", back_populates="organization")
+                                     back_populates="organization",
+                                     cascade='delete')
+    categories = relationship("Category", back_populates="organization",
+                              cascade='delete')
+    items = relationship("Item", back_populates="organization",
+                         cascade='delete')
+    purchases = relationship("Purchase", back_populates="organization",
+                             cascade='delete')
+    sales = relationship("Sale", back_populates="organization",
+                         cascade='delete')
 
     def __init__(self, **kwargs):
         """Initializes the class"""
@@ -93,7 +98,7 @@ class Organization(Base):
             if asso.user_id == user_id:
                 return asso.user_role
         return "Not a user within this organization"
-    
+
     def get_local_time(self) -> datetime:
         """Returns the current local time used by the organization"""
         desired_tz = pytz.timezone(self.time_zone)

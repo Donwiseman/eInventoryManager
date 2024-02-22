@@ -6,7 +6,7 @@ from database import storage
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
-from smtplib import SMTPConnectError
+from smtplib import SMTPConnectError, SMTPRecipientsRefused
 
 Mail = Email()
 
@@ -21,7 +21,6 @@ def reg_users():
         "password": request.form.get('password'),
         "mobile": request.form.get('mobile')
     }
-    print(kwargs)
 
     if kwargs["email"] is None or kwargs["password"] is None or\
             kwargs['first_name'] is None or kwargs['last_name'] is None:
@@ -29,15 +28,18 @@ def reg_users():
     user = storage.get_user_by_email(kwargs["email"])
     if user:
         return jsonify({'message': "email already exits"}), 400
-    new_user = storage.register_user(**kwargs)
     message = "Signup successful. Verification email sent."
     try:
         passW = Mail.generate_password()
         Mail.send_mail(kwargs['email'], passW)
-        new_user.active_token = passW
-        new_user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
     except SMTPConnectError:
         message = "Signup successful but verification email could not be sent"
+    except SMTPRecipientsRefused:
+        message = "Signup unsuccessful as Email is Invalid"
+        return jsonify({"message": message}), 400
+    new_user = storage.register_user(**kwargs)
+    new_user.active_token = passW
+    new_user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
     access_token = create_access_token(identity=new_user.id)
     storage.save()
     org = []
@@ -52,6 +54,7 @@ def reg_users():
     resp = {
         'message': message,
         "jwt": access_token,
+        "id": new_user.id,
         "fullName": f"{new_user.first_name} {new_user.last_name}",
         "email_verified": new_user.email_verified,
         "mobile_verified": new_user.mobile_verified,
@@ -83,6 +86,7 @@ def login():
     resp = {
         'message': "Login Succesful",
         "jwt": access_token,
+        "id": user.id,
         "fullName": f"{user.first_name} {user.last_name}",
         "email_verified": user.email_verified,
         "mobile_verified": user.mobile_verified,
