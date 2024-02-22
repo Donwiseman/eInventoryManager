@@ -7,7 +7,8 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from smtplib import SMTPConnectError, SMTPRecipientsRefused
 
 
-@app_look.route('/user', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
+@app_look.route('/user', methods=['GET', 'PUT', 'DELETE'],
+                strict_slashes=False)
 @jwt_required()
 def user():
     """Endpoint to handle the user resource"""
@@ -65,8 +66,8 @@ def user():
             except SMTPConnectError:
                 mesg = "Email updated but verification code could not be sent"
             except SMTPRecipientsRefused:
-                return jsonify({"message": "Update failed, email is invalid"})\
-                    , 400
+                mesg = "Update failed, email is invalid"
+                return jsonify({"message": mesg}), 400
             user.active_token = code
             user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
             user.email_verified = False
@@ -78,7 +79,7 @@ def user():
             user.first_name = first_name
             msg.append("First name updated")
         if last_name:
-            user.last_name =last_name
+            user.last_name = last_name
             msg.append("Last name updated")
         storage.save()
         return jsonify({"message": ", ".join(msg)})

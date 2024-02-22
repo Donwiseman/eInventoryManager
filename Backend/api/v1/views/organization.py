@@ -13,7 +13,7 @@ import pytz
 @jwt_required()
 def supported_Countries():
     """Returns a dictionary containing country names and
-       respective timezones. 
+       respective timezones.
     """
     countries = []
     for country_code, country in pytz.country_names.items():
@@ -29,7 +29,8 @@ def supported_Countries():
     return jsonify(countries)
 
 
-@app_look.route('/organizations', methods=['GET', 'POST'], strict_slashes=False)
+@app_look.route('/organizations', methods=['GET', 'POST'],
+                strict_slashes=False)
 @jwt_required()
 def organization():
     """Handles the creating an organization by the user and retrieving

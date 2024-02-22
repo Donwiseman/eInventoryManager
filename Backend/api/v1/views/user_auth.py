@@ -36,7 +36,8 @@ def reg_users():
     except SMTPConnectError:
         message = "Signup successful but verification email could not be sent"
     except SMTPRecipientsRefused:
-        return jsonify({"message": "Signup unsuccessful as Email is Invalid"}), 400
+        message = "Signup unsuccessful as Email is Invalid"
+        return jsonify({"message": message}), 400
     new_user = storage.register_user(**kwargs)
     new_user.active_token = passW
     new_user.token_expiry = datetime.utcnow() + timedelta(minutes=10)
