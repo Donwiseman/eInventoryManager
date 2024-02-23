@@ -122,10 +122,10 @@ This is the Backend application which manages the business logic and database of
         ```
     * PUT Details:
         + FORM FIELDS:
-            - email
-            - firstName
-            - lastName
-            - mobile
+            - email (optional)
+            - firstName (optional)
+            - lastName (optional)
+            - mobile (optional)
         + JSON RESPONSE
         ```
         {
@@ -201,5 +201,42 @@ This is the Backend application which manages the business logic and database of
                     "user_role":"Admin"
                 }, ...
             ]
+        }
+        ```
+
+#### api/v1/organizations/<id>
+- This handle getting and updating an organization details and deleting the organization account
+- **Methods**: GET, PUT, DELETE
+- **AUTHENTICATION**: JWT
+    * GET Details:
+        + No Required Fields
+        + Admins and Employee can access endpoint
+        + JSON Response:
+        ```
+        {
+            TO ADDD...
+        }
+        ```
+    
+    * PUT Details:
+        + FORM FIELDS:
+            - mobile (optional)
+            - image (optional)
+            - address (optional)
+            - description (optional)
+        + Access Limited to only Admins
+        + JSON RESPONSE
+        ```
+        {
+            "message": "mobile updated, Organization address Updated"
+        }
+        ```
+    * DELETE Details
+        + NO REQUIRED DATA
+        + Access Limited to only Admins
+        + JSON RESPONSE
+        ```
+        {
+            "message": "Organization account is deleted"
         }
         ```

@@ -57,6 +57,9 @@ def user():
         mobile = request.form.get('mobile')
         first_name = request.form.get('firstName')
         last_name = request.form.get('lastName')
+        if not email and not mobile and not first_name and not last_name:
+            mesg = "Update failed, Empty parameters"
+            return jsonify({"message": mesg}), 400
         if email:
             mail = Email()
             try:
