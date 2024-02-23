@@ -83,3 +83,23 @@ def organization():
             "organizations": org
         }
         return jsonify(resp)
+
+@app_look.route('/organizations/<organization_id>', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
+@jwt_required
+def organization(organization_id):
+    usr_id = get_jwt_identity()
+    if not usr_id:
+        return jsonify({"message": "Invalid token"}), 400
+    usr = storage.get_user_by_id(usr_id)
+    if not usr:
+        return jsonify({"message": "Token is invalid"}), 400
+    
+    if request.method == 'GET':
+        orgID = storage.get_org_by_id(organization_id)
+        if not orgID:
+            return jsonify({"message": "Organization dosent exist"}), 404
+        
+        data = [i for i in range(len(orgID))]
+        return jsonify(data), 200
+    
+    
