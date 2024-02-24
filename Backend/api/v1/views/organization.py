@@ -86,7 +86,7 @@ def organizations():
 
 @app_look.route('/organizations/<organization_id>',
                 methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
-@jwt_required
+@jwt_required()
 def organization(organization_id):
     user_id = get_jwt_identity()
     if not user_id:
