@@ -214,7 +214,18 @@ This is the Backend application which manages the business logic and database of
         + JSON Response:
         ```
         {
-            TO ADDD...
+            "address":null,
+            "country":"Nigeria",
+            "created_at":"2024-02-24 14:00:47",
+            "creator":"Emmanuel Adaja",
+            "description":"My interesting company",
+            "id":"9dcdda27-deb3-49c1-9a15-d4eb84335666",
+            "image":null,
+            "mobile":null,
+            "name":"My Company",
+            "time_zone":"Africa/Lagos",
+            "total_products":0,
+            "user_role":"Admin"
         }
         ```
     
