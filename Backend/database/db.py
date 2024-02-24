@@ -54,7 +54,7 @@ class Database:
         """Deletes the obj from storage"""
         self.__session.delete(obj)
 
-    def register_user(self, **kwargs):
+    def register_user(self, **kwargs) -> User:
         """Registers a user to the database."""
         new_user = User(**kwargs)
         self.__session.add(new_user)
@@ -63,9 +63,9 @@ class Database:
 
     def get_user_by_id(self, user_id: str) -> User:
         """returns a user based on the id"""
-        user = self.__session.query(User).filter(User.id == user_id).all()
-        if len(user) == 1:
-            return user[0]
+        user = self.__session.query(User).filter(User.id == user_id).first()
+        if user:
+            return user
         else:
             return None
 
@@ -81,34 +81,34 @@ class Database:
 
     def get_org_by_id(self, org_id: str) -> Organization:
         """returns an organization based on the id"""
-        user = self.__session.query(Organization).filter(
-            Organization.id == org_id).all()
-        if len(user) == 1:
-            return user[0]
+        org = self.__session.query(Organization).filter(
+            Organization.id == org_id).first()
+        if org:
+            return org
         else:
             return None
 
     def get_org_by_name(self, name: str) -> Organization:
         """returns an organization based on the name"""
-        user = self.__session.query(Organization).filter(
-            Organization.name == name).all()
-        if len(user) >= 1:
-            return user
+        org = self.__session.query(Organization).filter(
+            Organization.name == name).first()
+        if org:
+            return org
         else:
             return None
 
     def get_user_by_email(self, email: str) -> User:
         """returns a user based on the image"""
-        user = self.__session.query(User).filter(User.email == email).all()
-        if len(user) == 1:
-            return user[0]
+        user = self.__session.query(User).filter(User.email == email).first()
+        if user:
+            return user
         else:
             return None
 
     def get_user_by_mobile(self, mobile: str) -> User:
         """returns a user based on the mobile"""
-        user = self.__session.query(User).filter(User.mobile == mobile).all()
-        if len(user) == 1:
-            return user[0]
+        user = self.__session.query(User).filter(User.mobile == mobile).first()
+        if user:
+            return user
         else:
             return None

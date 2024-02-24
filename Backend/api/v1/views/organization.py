@@ -32,7 +32,7 @@ def supported_Countries():
 @app_look.route('/organizations', methods=['GET', 'POST'],
                 strict_slashes=False)
 @jwt_required()
-def organization():
+def organizations():
     """Handles the creating an organization by the user and retrieving
        list of those they belong to
     """
@@ -62,7 +62,7 @@ def organization():
             "message": "Organization succesfully created",
             "name": org.name,
             "id": org.id,
-            "created_at": org.created_at,
+            "created_at": org.created_at_local_time_strf(),
             "image": org.image,
             "country": org.country
         }
@@ -83,3 +83,75 @@ def organization():
             "organizations": org
         }
         return jsonify(resp)
+
+@app_look.route('/organizations/<organization_id>',
+                methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
+@jwt_required()
+def organization(organization_id):
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
+    user = storage.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message": "Token is invalid"}), 400
+    org = storage.get_org_by_id(organization_id)
+    if not org:
+        return jsonify({"message": "Organization dosent exist"}), 404
+    user_role = org.get_user_role(user_id)
+    if not user_role:
+        return jsonify({"message": "User not in Organization"}), 401
+
+    if request.method == 'GET':
+        creator_name = "Craetor Account has been deleted"
+        if org.creator:
+            creator_name = org.creator.full_name()
+        resp = {
+            "name": org.name,
+            "id": org.id,
+            "country": org.country,
+            "address": org.address,
+            "description": org.description,
+            "creator": creator_name,
+            "image": org.image,
+            "time_zone": org.time_zone,
+            "created_at": org.created_at_local_time_strf(),
+            "mobile": org.mobile,
+            "total_products": len(org.items),
+            "user_role": user_role
+        }
+        return jsonify(resp)
+
+    if request.method == 'PUT':
+        if user_role != "Admin":
+            msg = "Only Admins can update Organization details"
+            return jsonify({"message": msg}), 401
+        mobile = request.form.get('mobile')
+        description = request.form.get('description')
+        address = request.form.get('address')
+        image = request.form.get('image')
+        if not mobile and not description and not address and not image:
+            mesg = "Update failed, Empty parameters"
+            return jsonify({"message": mesg}), 400
+        msg = []
+        if mobile:
+            org.mobile = mobile
+            msg.append("Mobile updated")
+        if description:
+            org.description = description
+            msg.append("Organization description Updated")
+        if address:
+            org.address = address
+            msg.append("Organization address Updated")
+        if image:
+            org.image = image
+            msg.append("Organization image Updated")
+        storage.save()
+        return jsonify({"message": ", ".join(msg)})
+
+    if request.method == "DELETE":
+        if user_role != "Admin":
+            msg = "Only Admins can delete this Organization"
+            return jsonify({"message": msg}), 401
+        storage.delete(org)
+        storage.save()
+        return jsonify({"message": "Organization account is deleted"})

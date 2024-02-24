@@ -53,3 +53,7 @@ class User(Base):
         from database import storage
         self.hashed_password = self.__hash_password(password)
         storage.save()
+
+    def full_name(self):
+        """Returns full name of user"""
+        return f"{self.first_name} {self.last_name}"
