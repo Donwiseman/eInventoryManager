@@ -92,7 +92,7 @@ class Organization(Base):
         storage.save()
         return category
 
-    def get_user_role(self, user_id):
+    def get_user_role(self, user_id) -> str:
         """Gets the role of a given user within the organization"""
         for asso in self.user_associations:
             if asso.user_id == user_id:
@@ -105,7 +105,8 @@ class Organization(Base):
         date_now = datetime.utcnow()
         return date_now.replace(tzinfo=pytz.utc).astimezone(desired_tz)
     
-    def created_at_local_time(self):
+    def created_at_local_time_strf(self) -> str:
         """Returns the time of creation based on timezone"""
         desired_tz = pytz.timezone(self.time_zone)
-        return self.created_at.replace(tzinfo=pytz.utc).astimezone(desired_tz)
+        lt = self.created_at.replace(tzinfo=pytz.utc).astimezone(desired_tz)
+        return lt.strftime('%Y-%m-%d %H:%M:%S')

@@ -62,7 +62,7 @@ def organizations():
             "message": "Organization succesfully created",
             "name": org.name,
             "id": org.id,
-            "created_at": org.created_at,
+            "created_at": org.created_at_local_time_strf(),
             "image": org.image,
             "country": org.country
         }
@@ -114,7 +114,7 @@ def organization(organization_id):
             "creator": creator_name,
             "image": org.image,
             "time_zone": org.time_zone,
-            "created_at": org.created_at_local_time(),
+            "created_at": org.created_at_local_time_strf(),
             "mobile": org.mobile,
             "total_products": len(org.items),
             "user_role": user_role
