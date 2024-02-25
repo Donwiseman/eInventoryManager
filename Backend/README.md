@@ -97,6 +97,19 @@ This is the Backend application which manages the business logic and database of
     }
     ```
 
+#### api/v1/validate-token
+- This verifies that the JWT is valid
+- **Methods**: GET
+- **AUTHENTICATION**: JWT
+    * GET DETAILS:
+        + NO REQUIRED FORM FIELDS:
+    * JSON RESPONSE WITH 204 code:
+    ```
+    {
+        "message": "JWT is valid"
+    }
+    ```
+
 
 ### USER RESOURCE API
 

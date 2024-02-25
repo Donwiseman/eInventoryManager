@@ -176,3 +176,16 @@ def send_code():
     except SMTPConnectError:
         msg = "Error occurred sending verification code"
     return jsonify(msg)
+
+
+@app_look.route('/validate-token', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def validate_token():
+    """Check if JWT is valid"""
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid JSON token"}), 401
+    user = storage.get_user_by_id(user_id)
+    if user:
+        return jsonify({"message": "JWT is valid"}), 204
+    return jsonify({"message": "Invalid JSON token"}), 401
