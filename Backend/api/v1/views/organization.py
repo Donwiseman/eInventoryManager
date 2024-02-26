@@ -7,6 +7,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
 from smtplib import SMTPConnectError
 import pytz
+
 @app_look.route('/countries', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def supported_Countries():
@@ -25,6 +26,8 @@ def supported_Countries():
         }
         countries.append(country_data)
     return jsonify(countries)
+
+
 app_look.route('/organizations', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def organizations():
@@ -152,8 +155,8 @@ def organization(organization_id):
         storage.save()
         return jsonify({"message": "Organization account is deleted"})
 
-@app_look.route('/organizations/<organization_id>/products', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
-@jwt_required
+@app_look.route('/organizations/<organization_id>/products', methods=['GET', 'POST'], strict_slashes=False)
+@jwt_required()
 def products(organization_id):
     user_id = get_jwt_identity()
     if not user_id:
@@ -162,12 +165,40 @@ def products(organization_id):
     get_usr = storage.get_user_by_id(user_id)
     if not get_usr:
         return jsonify({"message": "Invalid access"}), 400
-    
-    get_org = storage.get_org_by_id(organization_id)
-    if not get_org:
-        return jsonify({"message": "Invalid access"}), 400
-    all_products = get_org.items
-    all_list = []
-    for count in range(len(all_products)):
-        all_list.append(count)
-    return jsonify(all_list)
+    org_id = storage.get_org_by_id(organization_id)
+    if not org_id:
+        return jsonify({"message": "Invalid organization"}), 400
+    try:
+        if request.method == "GET":
+            all_list = []
+            for count in org_id.items:
+                resp = {
+                    'name': count.name,
+                    'quantity': count.quantity,
+                    'sale_price': count.sale_price,
+                    'cost_price': count.cost_price,
+                    'unit': count.unit,
+                    'created_by': count.created_by
+                }
+                all_list.append(resp)
+            return all_list
+        
+        if request.method == 'POST':
+            kwarg = {
+                'name': request.form.get('name'),
+                'cost_price': request.form.get('costPrice'),
+                'sale_price': request.form.get('salePrice'),
+                'unit': request.form.get('unit'),
+                'image' : request.form.get('image'),
+                'quantity': request.form.get('quantity'),
+                'created_by': request.form.get('userName')
+            }
+
+            if not kwarg["name"] or not kwarg["cost_price"] or not kwarg["sale_price"] \
+                or not kwarg["quantity"] or not kwarg["image"] or not kwarg["created_by"]:
+                return jsonify({"message": "Incomplete data"}), 400
+            params = org_id.create_item(**kwarg)
+            return jsonify(params)
+    except Exception as err:
+        return f'error occured at {err}'
+        
