@@ -18,8 +18,10 @@ import FormError from '@/components/others/form-error'
 import FormSuccess from '@/components/others/form-success'
 import { loginAction } from '@/actions/login'
 import { useState, useTransition } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import axios from 'axios'
+import Cookies from 'js-cookie'
 
 
 export default function LoginForm () {
@@ -29,9 +31,10 @@ export default function LoginForm () {
     : ''
 
     const [isPending, startTransition] = useTransition()
-    const [resErrorMessage, setResErrorMessage] = useState('')
-    const [resSuccessMessage, setResSuccessMessage] = useState('')
+    const [errorMessage, setErrorMessage] = useState('')
+    const [successMessage, setSuccessMessage] = useState('')
     const [showtwoFactor, setShowTwoFactor] = useState(false)
+    const router = useRouter()
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -43,26 +46,27 @@ export default function LoginForm () {
     })
 
     const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-        setResErrorMessage('')
-        setResSuccessMessage('')
-        startTransition(async () => {
-            loginAction(values)
-            .then((data) => {
-                if (data?.error) {
-                    form.reset()
-                    setResErrorMessage(data.error)
-                }
-                if (data?.success) {
-                    form.reset()
-                    setResSuccessMessage(data.success)
-                }
+        setErrorMessage('')
+        setSuccessMessage('')
 
-                if (data?.twoFactor) {
-                    setShowTwoFactor(true)
+        const formData = new FormData();
+        formData.append('email', values.email);
+        formData.append('password', values.password);
+        startTransition(async () => {
+            await axios.post('https://test-goinventorymanager.koyeb.app/api/v1/login', formData)
+            .then((res) => {
+                if (res.status === 200) {
+                    setSuccessMessage(res.data.message)
+                    Cookies.set('jwt', res.data.jwt)
+                    router.push('/user')
+                } else {
+                    setErrorMessage(res.data.message)
                 }
             })
-            .catch (() => setResErrorMessage('There was an error signing you up. Try again in a few minutes'))
-                
+            .catch((error: any) => {
+                setErrorMessage('Something went wrong. Please try again later!')
+                console.error(error)
+            })
         })
     }
 
@@ -137,17 +141,17 @@ export default function LoginForm () {
                                             size='lg'
                                             className='px-auto w-full'
                                             >
-                                                <Link href='/auth/reset'>Forgot Password</Link>
+                                                <Link href='/forgot-password'>Forgot Password</Link>
                                             </Button>
-                                            <FormMessage className='text-red-600'/>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                             </>
                         )}
                     </div>
-                    <FormError message={resErrorMessage || urlError}/>
-                    <FormSuccess message={resSuccessMessage}/>
+                    <FormError message={errorMessage || urlError}/>
+                    <FormSuccess message={successMessage}/>
                     <Button
                         disabled={isPending}
                         type='submit'

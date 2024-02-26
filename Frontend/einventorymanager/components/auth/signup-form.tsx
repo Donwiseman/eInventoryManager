@@ -15,34 +15,48 @@ import * as z from 'zod'
 import { SignupSchema } from '@/schemas'
 import { Button } from '../ui/button'
 import { useState, useTransition } from 'react'
-import { signupAction } from '@/actions/signup'
 import FormError from '@/components/others/form-error'
 import FormSuccess from '@/components/others/form-success'
 import CardWrapper from './card-warpper'
+import axios from 'axios'
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 
 export default function SignupForm () {
     const [isPending, startTransition] = useTransition()
     const [resErrorMessage, setResErrorMessage] = useState('')
     const [resSuccessMessage, setResSuccessMessage] = useState('')
+    const router = useRouter()
 
     const form = useForm<z.infer<typeof SignupSchema>>({
         resolver: zodResolver(SignupSchema),
-        defaultValues: {
-            email: '',
-            password: '',
-            name: ''
-        }
     })
 
     const onSubmit = (values: z.infer<typeof SignupSchema>) => {
         setResErrorMessage('')
         setResSuccessMessage('')
+
+        const formData = new FormData();
+        formData.append('email', values.email);
+        formData.append('password', values.password);
+        formData.append('firstName', values.firstName);
+        formData.append('lastName', values.lastName);
+
         startTransition(async () => {
-            const res = await signupAction(values)
-            if (res.success) setResSuccessMessage(res.success)
-            else if (res.error) setResErrorMessage(res.error)
-            else setResErrorMessage('There was an error signing you up. Try again in a few minutes')
+            await axios.post('https://test-goinventorymanager.koyeb.app/api/v1/signup', formData)
+            .then((res) => {
+                if (res.status === 200) {
+                    Cookies.set('jwt', res.data.jwt)
+                    setResSuccessMessage(res.data.message)
+                    router.push('/user')
+                } else {
+                    setResErrorMessage(res.data.message)
+                }
+            })
+            .catch((error) => {
+                setResErrorMessage(error)
+            })
         })
     }
 
@@ -72,7 +86,7 @@ export default function SignupForm () {
                                          type='email'
                                         />
                                     </FormControl>
-                                    <FormMessage className='text-red-600'/>
+                                    <FormMessage className=''/>
                                 </FormItem>
                             )}
                         />
@@ -89,24 +103,39 @@ export default function SignupForm () {
                                          type='password'
                                         />
                                     </FormControl>
-                                    <FormMessage className='text-red-600'/>
+                                    <FormMessage className=''/>
                                 </FormItem>
                             )}
                         />
                         <FormField
                             control={form.control}
-                            name='name'
+                            name='firstName'
                             render={({ field}) => (
                                 <FormItem>
                                     <FormControl>
                                         <Input
                                          {...field}
                                          disabled={isPending}
-                                         placeholder='john doe'
-                                         type='text'
+                                         placeholder='john'
                                         />
                                     </FormControl>
-                                    <FormMessage className='text-red-600'/>
+                                    <FormMessage className=''/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name='lastName'
+                            render={({ field}) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input
+                                         {...field}
+                                         disabled={isPending}
+                                         placeholder='Evans'
+                                        />
+                                    </FormControl>
+                                    <FormMessage className=''/>
                                 </FormItem>
                             )}
                         />
@@ -115,7 +144,7 @@ export default function SignupForm () {
                     <FormSuccess message={resSuccessMessage}/>
                     <Button
                         disabled={isPending}
-                        className='w-full bg-slate-900 text-white'
+                        className='w-full'
                         type='submit'
                     >
                         Register

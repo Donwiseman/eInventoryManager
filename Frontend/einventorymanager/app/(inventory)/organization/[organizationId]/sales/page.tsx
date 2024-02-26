@@ -9,6 +9,7 @@ import * as z from 'zod'
 import { Input } from '@/components/ui/input'
 import { FaSearch as SearcIcon } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
+import { useOrganization } from '@/contexts/organization-context'
 
 
 function ItemsPage() {
@@ -91,11 +92,25 @@ function ItemsPage() {
       quantity: 200
     }
   ]
+  
 
   const [tableData, setTableData] = useState<typeof ItemsTableSchema[]>()
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState<typeof ItemsTableSchema[]>() 
+  const [searchResults, setSearchResults] = useState<typeof ItemsTableSchema[]>()
 
+  const { organization, loading, error } = useOrganization();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!organization) {
+    return <div>No organization data available</div>;
+  }
 
   return (
     <div className='flex-1'>

@@ -28,7 +28,7 @@ import { useRouter } from 'next/navigation'
 
 function Sidebar() {
   const organizationId = '142777298'
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(1)
   const router = useRouter()
 
