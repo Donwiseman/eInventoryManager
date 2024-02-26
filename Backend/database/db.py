@@ -112,3 +112,6 @@ class Database:
             return user
         else:
             return None
+        
+    def to_dict(self):
+        """Puts all data into a json format"""

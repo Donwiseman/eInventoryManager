@@ -91,3 +91,6 @@ class Item(Base):
         storage.add(new_sale)
         storage.save()
         return new_sale
+    
+    # def to_dict(self):
+
