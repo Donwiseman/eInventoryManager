@@ -151,4 +151,23 @@ def organization(organization_id):
         storage.delete(org)
         storage.save()
         return jsonify({"message": "Organization account is deleted"})
+
+@app_look.route('/organizations/<organization_id>/products', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
+@jwt_required
+def products(organization_id):
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
     
+    get_usr = storage.get_user_by_id(user_id)
+    if not get_usr:
+        return jsonify({"message": "Invalid access"}), 400
+    
+    get_org = storage.get_org_by_id(organization_id)
+    if not get_org:
+        return jsonify({"message": "Invalid access"}), 400
+    all_products = get_org.items
+    all_list = []
+    for count in range(len(all_products)):
+        all_list.append(count)
+    return jsonify(all_list)
