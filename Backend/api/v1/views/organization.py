@@ -181,7 +181,7 @@ def products(organization_id):
                     'created_by': count.created_by
                 }
                 all_list.append(resp)
-            return all_list
+            return jsonify(all_list)
         
         if request.method == 'POST':
             kwarg = {
