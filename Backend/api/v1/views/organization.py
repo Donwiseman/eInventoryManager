@@ -7,8 +7,6 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
 from smtplib import SMTPConnectError
 import pytz
-
-
 @app_look.route('/countries', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def supported_Countries():
@@ -27,12 +25,9 @@ def supported_Countries():
         }
         countries.append(country_data)
     return jsonify(countries)
-
-
-@app_look.route('/organizations', methods=['GET', 'POST'],
-                strict_slashes=False)
+app_look.route('/organizations', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
-def organization():
+def organizations():
     """Handles the creating an organization by the user and retrieving
        list of those they belong to
     """
@@ -42,7 +37,6 @@ def organization():
     user = storage.get_user_by_id(user_id)
     if not user:
         return jsonify({"message": "Invalid JSON token claims"}), 401
-
     if request.method == "POST":
         kwargs = {
             "name": request.form.get('name'),
@@ -67,7 +61,6 @@ def organization():
             "country": org.country
         }
         return jsonify(resp)
-
     if request.method == "GET":
         org = []
         for asso in user.org_associations:
@@ -84,36 +77,78 @@ def organization():
         }
         return jsonify(resp)
 
-@app_look.route('/organizations/<organization_id>', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
+@app_look.route('/organizations/<organization_id>',
+                methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
 @jwt_required
 def organization(organization_id):
-    usr_id = get_jwt_identity()
-    if not usr_id:
-        return jsonify({"message": "Invalid token"}), 400
-    usr = storage.get_user_by_id(usr_id)
-    if not usr:
-        return jsonify({"message": "Token is invalid"}), 400
-    
-    if request.method == 'GET':
-        org = storage.get_org_by_id(organization_id)
-        if not org:
-            return jsonify({"message": "Organization dosent exist"}), 404
-        
-@app_look.route('/organizations/<organization_id>/products', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
-@jwt_required
-def products(organization_id):
+
     user_id = get_jwt_identity()
     if not user_id:
         return jsonify({"message": "Invalid token"}), 400
-    get_usr = storage.get_user_by_id(user_id)
-    if not get_usr:
-        return jsonify({"message": "Invalid access"}), 400
+    
+    user = storage.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message": "Token is invalid"}), 400
+
+    org = storage.get_org_by_id(organization_id)
+    if not org:
+        return jsonify({"message": "Organization dosent exist"}), 404
+    user_role = org.get_user_role(user_id)
+    if not user_role:
+        return jsonify({"message": "User not in Organization"}), 401
+    
     if request.method == 'GET':
-        get_org = storage.get_org_by_id(organization_id)
-        if not get_org:
-            return jsonify({"message": "Invalid access"}), 400
-        all_products = get_org.items
-        all_list = []
-        for count in range(len(all_products)):
-            all_list.append(count)
-        return jsonify(all_list)
+        creator_name = "Craetor Account has been deleted"
+        if org.creator:
+            creator_name = org.creator.full_name()
+        resp = {
+            "name": org.name,
+            "id": org.id,
+            "country": org.country,
+            "address": org.address,
+            "description": org.description,
+            "creator": creator_name,
+            "image": org.image,
+            "time_zone": org.time_zone,
+            "created_at": org.created_at_local_time(),
+            "mobile": org.mobile,
+            "total_products": len(org.items),
+            "user_role": user_role
+        }
+        return jsonify(resp)
+
+    if request.method == 'PUT':
+        if user_role != "Admin":
+            msg = "Only Admins can update Organization details"
+            return jsonify({"message": msg}), 401
+        mobile = request.form.get('mobile')
+        description = request.form.get('description')
+        address = request.form.get('address')
+        image = request.form.get('image')
+        if not mobile and not description and not address and not image:
+            mesg = "Update failed, Empty parameters"
+            return jsonify({"message": mesg}), 400
+        msg = []
+        if mobile:
+            org.mobile = mobile
+            msg.append("Mobile updated")
+        if description:
+            org.description = description
+            msg.append("Organization description Updated")
+        if address:
+            org.address = address
+            msg.append("Organization address Updated")
+        if image:
+            org.image = image
+            msg.append("Organization image Updated")
+        storage.save()
+        return jsonify({"message": ", ".join(msg)})
+
+    if request.method == "DELETE":
+        if user_role != "Admin":
+            msg = "Only Admins can delete this Organization"
+            return jsonify({"message": msg}), 401
+        storage.delete(org)
+        storage.save()
+        return jsonify({"message": "Organization account is deleted"})
+    
