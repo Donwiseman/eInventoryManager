@@ -7,8 +7,6 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
 from smtplib import SMTPConnectError
 import pytz
-from models.items import Item
-item = Item()
 
 @app_look.route('/countries', methods=['GET'], strict_slashes=False)
 @jwt_required()
@@ -173,16 +171,18 @@ def sales(organization_id):
     if request.method == 'POST':
         org = request.get_json()
         items = org.get('items')
+        list_items = []
         for item in range(len(items)):
             get_item = storage.get_item_by_id(item['id'])
             if not get_item:
                 return jsonify({"message": "Item dosen't exist in database"}), 400
-            get_quantity = item['quantity']
-            get_time = get_org.created_at_local_time_strf
-            get_username = get_usr.full_name
-            get_description = item['description']
+            get_quantity = item.get('quantity')
+            get_time = get_org.get_local_time()
+            get_username = get_usr.full_name()
+            get_description = item.get('description')
             makeSale = get_item.remove(get_quantity, get_time, get_username, get_description)
-        return jsonify(makeSale), 200
+            list_items.append(makeSale)
+        return jsonify(list_items), 200
     
 @app_look.route('/organizations/<organization_id>/products', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
@@ -220,7 +220,7 @@ def products(organization_id):
             'sale_price': request.form.get('salePrice'),
             'unit': request.form.get('unit'),
             'quantity': request.form.get('quantity'),
-            'full_name': get_usr.full_name
+            'full_name': get_usr.full_name()
         }
 
         if not kwarg["name"] or not kwarg["cost_price"] or not kwarg["sale_price"] \
