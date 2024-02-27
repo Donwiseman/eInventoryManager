@@ -7,6 +7,8 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
 from smtplib import SMTPConnectError
 import pytz
+from models.items import Item
+item = Item()
 
 @app_look.route('/countries', methods=['GET'], strict_slashes=False)
 @jwt_required()
@@ -113,7 +115,7 @@ def organization(organization_id):
             "creator": creator_name,
             "image": org.image,
             "time_zone": org.time_zone,
-            "created_at": org.created_at_local_time(),
+            "created_at": org.created_at_local_time_strf(),
             "mobile": org.mobile,
             "total_products": len(org.items),
             "user_role": user_role
@@ -154,7 +156,34 @@ def organization(organization_id):
         storage.delete(org)
         storage.save()
         return jsonify({"message": "Organization account is deleted"})
-
+    
+@app_look.route('/organizations/<organization_id>/sales', methods=['GET', 'POST'], strict_slashes=False)
+@jwt_required()
+def sales(organization_id):
+    """Gets and creates sales for an organization"""
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
+    get_usr = storage.get_user_by_id(user_id)
+    if not get_usr:
+        return jsonify({"message": "Invalid access"}), 400
+    get_org = storage.get_org_by_id(organization_id)
+    if not get_org:
+        return jsonify({"message": "Invalid access"}), 400
+    if request.method == 'POST':
+        org = request.get_json()
+        items = org.get('items')
+        for item in range(len(items)):
+            get_item = storage.get_item_by_id(item['id'])
+            if not get_item:
+                return jsonify({"message": "Item dosen't exist in database"}), 400
+            get_quantity = item['quantity']
+            get_time = get_org.created_at_local_time_strf
+            get_username = get_usr.full_name
+            get_description = item['description']
+            makeSale = get_item.remove(get_quantity, get_time, get_username, get_description)
+        return jsonify(makeSale), 200
+    
 @app_look.route('/organizations/<organization_id>/products', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def products(organization_id):
@@ -190,7 +219,6 @@ def products(organization_id):
             'cost_price': request.form.get('costPrice'),
             'sale_price': request.form.get('salePrice'),
             'unit': request.form.get('unit'),
-            'image' : request.form.get('image'),
             'quantity': request.form.get('quantity'),
             'full_name': get_usr.full_name
         }
