@@ -168,37 +168,36 @@ def products(organization_id):
     org_id = storage.get_org_by_id(organization_id)
     if not org_id:
         return jsonify({"message": "Invalid organization"}), 400
-    try:
-        if request.method == "GET":
-            all_list = []
-            for count in org_id.items:
-                resp = {
-                    'name': count.name,
-                    'quantity': count.quantity,
-                    'sale_price': count.sale_price,
-                    'cost_price': count.cost_price,
-                    'unit': count.unit,
-                    'created_by': count.created_by
-                }
-                all_list.append(resp)
-            return jsonify(all_list)
-        
-        if request.method == 'POST':
-            kwarg = {
-                'name': request.form.get('name'),
-                'cost_price': request.form.get('costPrice'),
-                'sale_price': request.form.get('salePrice'),
-                'unit': request.form.get('unit'),
-                'image' : request.form.get('image'),
-                'quantity': request.form.get('quantity'),
-                'created_by': request.form.get('userName')
+    
+    if request.method == "GET":
+        all_list = []
+        for count in org_id.items:
+            resp = {
+                'id': count.id,
+                'name': count.name,
+                'quantity': count.quantity,
+                'sale_price': count.sale_price,
+                'cost_price': count.cost_price,
+                'unit': count.unit,
+                'created_by': count.created_by
             }
+            all_list.append(resp)
+        return jsonify(all_list)
+    
+    if request.method == 'POST':
+        kwarg = {
+            'name': request.form.get('name'),
+            'cost_price': request.form.get('costPrice'),
+            'sale_price': request.form.get('salePrice'),
+            'unit': request.form.get('unit'),
+            'image' : request.form.get('image'),
+            'quantity': request.form.get('quantity'),
+            'full_name': get_usr.full_name
+        }
 
-            if not kwarg["name"] or not kwarg["cost_price"] or not kwarg["sale_price"] \
-                or not kwarg["quantity"] or not kwarg["image"] or not kwarg["created_by"]:
-                return jsonify({"message": "Incomplete data"}), 400
-            params = org_id.create_item(**kwarg)
-            return jsonify(params)
-    except Exception as err:
-        return f'error occured at {err}'
-        
+        if not kwarg["name"] or not kwarg["cost_price"] or not kwarg["sale_price"] \
+            or not kwarg["quantity"] or not kwarg["image"]:
+            return jsonify({"message": "Incomplete data"}), 400
+        params = org_id.create_item(**kwarg)
+        return jsonify(params)
+    
