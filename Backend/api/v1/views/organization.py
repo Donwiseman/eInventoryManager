@@ -28,7 +28,7 @@ def supported_Countries():
     return jsonify(countries)
 
 
-app_look.route('/organizations', methods=['GET', 'POST'], strict_slashes=False)
+@app_look.route('/organizations', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def organizations():
     """Handles the creating an organization by the user and retrieving
@@ -168,12 +168,16 @@ def sales(organization_id):
     get_org = storage.get_org_by_id(organization_id)
     if not get_org:
         return jsonify({"message": "Invalid access"}), 400
+    
     if request.method == 'POST':
         org = request.get_json()
         items = org.get('items')
+        if items is None or not isinstance(items, list):
+            return jsonify({"message": "Invalid or missing 'items' in the request JSON"}), 400
         list_items = []
-        for item in range(len(items)):
-            get_item = storage.get_item_by_id(item['id'])
+        for item in items:
+            item_id = item.get('id')
+            get_item = storage.get_item_by_id(item_id)
             if not get_item:
                 return jsonify({"message": "Item dosen't exist in database"}), 400
             get_quantity = item.get('quantity')
@@ -224,8 +228,8 @@ def products(organization_id):
         }
 
         if not kwarg["name"] or not kwarg["cost_price"] or not kwarg["sale_price"] \
-            or not kwarg["quantity"] or not kwarg["image"]:
+            or not kwarg["quantity"]:
             return jsonify({"message": "Incomplete data"}), 400
         params = org_id.create_item(**kwarg)
-        return jsonify(params)
+        return jsonify([params]), 200
     
