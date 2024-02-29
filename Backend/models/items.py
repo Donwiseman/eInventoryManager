@@ -35,7 +35,7 @@ class Item(Base):
         """Initializes the class """
         self.id = str(uuid.uuid4())
         self.name = kwargs.get("name", None)
-        self.Category_id = kwargs.get("category_id", None)
+        self.category_id = kwargs.get("category_id", None)
         self.created_by = kwargs.get("user_name", None)
         self.image = kwargs.get("image", None)
         self.unit = kwargs.get("unit", None)

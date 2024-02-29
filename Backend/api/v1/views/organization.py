@@ -256,6 +256,8 @@ def products(organization_id):
             'sale_price': request.form.get('salePrice'),
             'unit': request.form.get('unit'),
             'quantity': request.form.get('quantity'),
+            'total_cost': request.form.get('totalCost'),
+            'category_id': request.form.get('categoryId'),
             'user_name': get_usr.full_name()
         }
 
@@ -497,7 +499,7 @@ def categories(organization_id):
         return jsonify({"message": "User not in Organization"}), 401
 
     if request.method == "POST":
-        name = request.form.get('category')
+        name = request.form.get('name')
         description = request.form.get('description')
         if not name:
             return jsonify({"message": "Incomplete parameters"})
