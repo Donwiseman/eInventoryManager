@@ -1,9 +1,7 @@
 """This defines the Organization class and it's mappingss to the DB"""
 from . import Base
-from datetime import datetime
 from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-import uuid
 
 
 class OrgUserAssociation(Base):

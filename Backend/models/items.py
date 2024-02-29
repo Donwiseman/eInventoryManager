@@ -12,8 +12,8 @@ class Item(Base):
     __tablename__ = "items"
     id = Column(String(60), primary_key=True)
     name = Column(String(128), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     category_id = Column(String(128), ForeignKey("categories.id"))
     created_by = Column(String(128))
     image = Column(String(512))
@@ -51,7 +51,7 @@ class Item(Base):
         from database import storage
         from .purchases import Purchase
         self.quantity += quantity
-        storage.__session.add(self)
+        self.updated_at = time
         trans = {
             "date": time,
             "user_name": user_name,
@@ -87,6 +87,7 @@ class Item(Base):
             "total_cost": sale,
             "new_item_total": self.quantity
         }
+        self.updated_at = time
         new_sale = Sale(**trans)
         storage.add(new_sale)
         storage.save()

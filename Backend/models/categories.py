@@ -11,7 +11,7 @@ class Category(Base):
     __tablename__ = "categories"
     id = Column(String(60), primary_key=True)
     name = Column(String(128), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True))
     description = Column(String(128))
     organization_id = Column(String(128), ForeignKey("organizations.id"),
                              nullable=False)
