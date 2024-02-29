@@ -175,19 +175,39 @@ def sales(organization_id):
         items = org.get('items')
         if items is None or not isinstance(items, list):
             return jsonify({"message": "Invalid or missing 'items' in the request JSON"}), 400
+        get_time = get_org.get_local_time()
         list_items = []
         for item in items:
             item_id = item.get('id')
             get_item = storage.get_item_by_id(item_id)
             if not get_item:
-                return jsonify({"message": "Item dosen't exist in database"}), 400
+                tr = {
+                    "status": "failed transaction, wrong product id",
+                    "product_id": item_id
+                }
+                list_items.append(tr)
+                continue
             get_quantity = item.get('quantity')
-            get_time = get_org.get_local_time()
             get_username = get_usr.full_name()
             get_description = item.get('description')
-            makeSale = get_item.remove(get_quantity, get_time, get_username, get_description)
-            list_items.append(makeSale)
+            try:
+                make_sale = get_item.remove(get_quantity, get_time,
+                                           get_username, get_description)
+                tr = make_sale.transaction()
+                tr["status"] = "succesful transaction"
+                list_items.append(tr)
+            except ValueError:
+                failed_sale = {
+                    "status": "failed transaction, Not enough quantity",
+                    "product_id": item_id
+                }
+                list_items.append(failed_sale)
         return jsonify(list_items), 200
+
+
+def sort_item_dict(item_dict):
+    """A sorting key function for item dictionary"""
+    return item_dict['name']
 
 
 @app_look.route('/organizations/<organization_id>/products', methods=['GET', 'POST'], strict_slashes=False)
@@ -206,19 +226,28 @@ def products(organization_id):
         return jsonify({"message": "Invalid organization"}), 400
 
     if request.method == "GET":
+        page_sent = request.form.get('page')
+        try:
+            page = int(page_sent)
+        except Exception:
+            page = 1
         all_list = []
-        for count in org_id.items:
-            resp = {
-                'id': count.id,
-                'name': count.name,
-                'quantity': count.quantity,
-                'sale_price': count.sale_price,
-                'cost_price': count.cost_price,
-                'unit': count.unit,
-                'created_by': count.created_by
-            }
-            all_list.append(resp)
-        return jsonify(all_list)
+        for item in org_id.items:
+            if item.obsolete == True:
+                continue
+            all_list.append(item.to_dict())
+        all_list.sort(key=sort_item_dict)
+        resp = {
+            "page": page,
+            "data": all_list,
+            "next": None
+        }
+        if len(all_list) > 36:
+            start = (page - 1) * 36
+            end = start + 36
+            resp["data"] = all_list[start:end]
+            resp["next"] = page + 1
+        return jsonify(resp)
     
     if request.method == 'POST':
         kwarg = {
@@ -233,17 +262,12 @@ def products(organization_id):
         if not kwarg["name"] or not kwarg["cost_price"] or not kwarg["sale_price"] \
             or not kwarg["quantity"]:
             return jsonify({"message": "Incomplete data"}), 400
-        params = org_id.create_item(**kwarg)
-        return jsonify(params)
-
-
-def sort_item_dict(item_dict):
-    """A sorting key function for item dictionary"""
-    return item_dict['name']
+        item = org_id.create_item(**kwarg)
+        return jsonify(item.to_dict())
 
 
 @app_look.route('/organizations/<organization_id>/products/search',
-                methods=['POST'], strict_slashes=False)
+                methods=['GET'], strict_slashes=False)
 @jwt_required()
 def product_search(organization_id):
     """Returns a list of items that match the keyword"""
@@ -262,13 +286,13 @@ def product_search(organization_id):
     if not user_role:
         return jsonify({"message": "User not in Organization"}), 401
 
-    if request.method == "POST":
+    if request.method == "GET":
         keyword = request.form.get('keyword')
         page_sent = request.form.get('page')
         try:
             page = int(page_sent)
         except Exception:
-            page = 0
+            page = 1
         search_items = []
         if not keyword:
             return jsonify({"message": "No search keyword provided"}), 400
@@ -278,16 +302,21 @@ def product_search(organization_id):
                     continue
                 search_items.append(item.to_dict())
         search_items.sort(key=sort_item_dict)
-        resp = search_items
+        resp = {
+            "page": page,
+            "data": search_items,
+            "next": None
+        }
         if len(search_items) > 36:
-            start = page * 36
+            start = (page - 1) * 36
             end = start + 36
-            resp = search_items[start:end]
+            resp["data"] = search_items[start:end]
+            resp["next"] = page + 1
         return jsonify(resp)
 
 
 @app_look.route('/organizations/<organization_id>/products/<product_id>',
-                methods=['GET', 'PUT', 'DELTE'], strict_slashes=False)
+                methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
 @jwt_required()
 def product(organization_id, product_id):
     """Gets and updates a particular product in the inventory"""
@@ -426,11 +455,16 @@ def proudct_category(organization_id):
                 continue
             cat_items.append(item.to_dict())
         cat_items.sort(key=sort_item_dict)
-        resp = cat_items
+        resp = {
+            "page": page,
+            "data": cat_items,
+            "next": None
+        }
         if len(cat_items) > 36:
-            start = page * 36
+            start = (page - 1) * 36
             end = start + 36
-            resp = cat_items[start:end]
+            resp["data"] = cat_items[start:end]
+            resp["next"] = page + 1
         return jsonify(resp)
 
 

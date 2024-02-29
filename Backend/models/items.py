@@ -47,7 +47,7 @@ class Item(Base):
 
     def add(self, quantity: int, purchase_cost: float, time, description: str,
             user_name):
-        """Adds more unit of an item"""
+        """Adds more unit of an item and returns a purchase object"""
         from database import storage
         from .purchases import Purchase
         self.quantity += quantity
@@ -69,7 +69,7 @@ class Item(Base):
 
     def remove(self, quantity: int, time, user_name: str,
                description: str = None, sale: float = None):
-        """removes some unit of an item"""
+        """removes some unit of an item and returns a sale object"""
         from database import storage
         from .sales import Sale
         if self.quantity < quantity:

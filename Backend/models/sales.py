@@ -34,3 +34,17 @@ class Sale(Base):
         self.sale_total = kwargs.get("total_cost")
         self.items_left = kwargs.get("new_item_total")
         self.details = kwargs.get("details")
+
+    def transaction(self) -> dict:
+        """returns a dict representation of the transaction"""
+        tr = {
+            "Product_id": self.item_id,
+            "transaction_id": self.id,
+            "transaction_time": self.date('%Y-%m-%d %H:%M:%S'),
+            "transaction_type": "Sale",
+            "quantity": self.quantity,
+            "total_cost": self.sale_total,
+            "products_in_store": self.items_left,
+            "transaction_done_by": self.done_by
+        }
+        return tr
