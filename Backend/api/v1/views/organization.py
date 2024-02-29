@@ -341,6 +341,7 @@ def product(organization_id, product_id):
     if request.method == "PUT":
         # for adding more quantities and updating other values.
         msg = []
+        transaction = {}
         quantity_str = request.form.get('quantity')
         purchase_cost_str = request.form.get('purchaseCost')
         description = request.form.get('description')
@@ -364,6 +365,7 @@ def product(organization_id, product_id):
             pur = item.add(quantity, purchase_cost, org.get_local_time(),
                            description, user.full_name())
             msg.append(f"{item.name} purchase succesfully added")
+            transaction = pur.transaction()
         if name:
             item.name = name
             msg.append("Product name succesfully updated")
@@ -398,7 +400,11 @@ def product(organization_id, product_id):
             item.category_id = category_id
             msg.append("Product category succesfully updated")
         storage.save()
-        return jsonify({"message": ", ".join(msg)})
+        resp = {
+            "message": ", ".join(msg),
+            "transaction": transaction
+        }
+        return jsonify(resp)
     if request.method == "GET":
         return jsonify(item.to_dict())
     if request.method == "DELETE":
@@ -417,7 +423,11 @@ def product(organization_id, product_id):
             sale_tr = item.remove(quantity, org.get_local_time(),
                                   user.full_name(), description, sale)
             msg = f"{quantity} unit of {item.name} removed"
-            return jsonify({"message": msg})
+            resp = {
+                "message": msg,
+                "transaction": sale_tr.transaction()
+            }
+            return jsonify(resp)
 
 
 @app_look.route('/organizations/<organization_id>/products/category',
@@ -498,7 +508,7 @@ def categories(organization_id):
                 "name": new_cat.name,
                 "id": new_cat.id,
                 "description": new_cat.description,
-                "created_at": new_cat.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                "created_at": org.localize(new_cat.created_at)
             }
         }
         return jsonify(resp)
@@ -510,7 +520,7 @@ def categories(organization_id):
                 "name": cat.name,
                 "id": cat.id,
                 "description": cat.description,
-                "created_at": cat.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                "created_at": org.localize(cat.created_at)
             }
             resp.append(cat_detail)
         return jsonify(resp)

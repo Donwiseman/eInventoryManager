@@ -95,6 +95,7 @@ class Item(Base):
 
     def to_dict(self):
         """Returns a dict representation of object"""
+        date = self.organization.localize(self.updated_at)
         item_dict = {
             "id": self.id,
             "name": self.name,
@@ -104,6 +105,6 @@ class Item(Base):
             "sale_price": self.sale_price,
             "image": self.image,
             "category_id": self.category_id,
-            "last_updated": self.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            "last_updated": date
         }
         return item_dict
