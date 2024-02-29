@@ -217,7 +217,7 @@ This is the Backend application which manages the business logic and database of
         }
         ```
 
-#### api/v1/organizations/<id>
+#### api/v1/organizations/<organization_id>
 - This handle getting and updating an organization details and deleting the organization account
 - **Methods**: GET, PUT, DELETE
 - **AUTHENTICATION**: JWT
@@ -264,3 +264,275 @@ This is the Backend application which manages the business logic and database of
             "message": "Organization account is deleted"
         }
         ```
+
+#### api/v1/organizations/<organization_id>/categories
+- Handles creating and loading the various product categories
+- **Methods**: GET, POST
+- **AUTHENTICATION**: JWT
+    * GET Details:
+        + NO REQUIRED DATA
+        + Aceessible to all staff
+        + JSON RESPONSE
+        ```
+        [
+            {
+                "created_at":"2024-02-29 17:34:49", 
+                "description":null,"
+                id":"629bb559-d9bb-4653-a527-e144de36f805",
+                "name":"analgesics"
+            },
+            {
+                "created_at":"2024-02-29 17:37:56",
+                "description":null,
+                "id":"8b7f5399-3f7e-438c-b1eb-7d8e29b2081b",
+                "name":"Antibiotics"
+            }
+        ]
+        ```
+    * POST Details:
+        + REQUIRED FORM DATA
+            - name: the category name
+            - description (optional): brief description of category
+        + Accessible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "created_at":"2024-02-29 17:34:49",
+            "description":null,
+            "id":"629bb559-d9bb-4653-a527-e144de36f805",
+            "name":"analgesics"
+        }
+        ```
+
+#### api/v1/organizations/<organization_id>/products
+- Handles loading all products(with pagination) and creating new product
+- **Methods**: GET, POST
+- **AUTHENTICATION**: JWT
+    * GET Details:
+        + REQUIRED FORM DATA
+            - page (default = 1): page number to product view
+        + Accessible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "data":[
+                {
+                    "category_id":null,
+                    "cost_price":70.0,
+                    "id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "image":null,
+                    "last_updated":"2024-02-29 20:30:24",
+                    "name":"paracetamol",
+                    "quantity":2,
+                    "sale_price":100.0,
+                    "unit":"satchet"
+                }
+            ],
+            "next":null,
+            "page":1
+        }
+        ```
+    * POST details
+        + REQUIRED FORM DATA
+            - name: name of product
+            - costPrice (optional): the cost price of a unit of the product
+            - salePrice: sale price for a unit of the product
+            - quantity: Number of units of the product being added
+            - totalCost (default = 0): total cost of purchasing the product
+            - unit (optional): name for a unit of the time i.e satchet
+            - categoryId (optional): id of category the product belongs to
+        + Accesible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "category_id":"629bb559-d9bb-4653-a527-e144de36f805",
+            "cost_price":100.0,
+            "id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+            "image":null,
+            "last_updated":"2024-02-29 22:01:05",
+            "name":"diclofenac",
+            "quantity":10,
+            "sale_price":150.0,
+            "unit":"pack"
+        }
+        ```
+
+#### api/v1/organizations/<organization_id>/products/<product_id>
+- Handles loading all products(with pagination) and creating new product
+- **Methods**: GET, PUT, DELETE
+- **AUTHENTICATION**: JWT
+    * GET Details:
+        + NO REQUIRED DATA
+        + Accessible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "category_id":"629bb559-d9bb-4653-a527-e144de36f805",
+            "cost_price":100.0,
+            "id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+            "image":null,
+            "last_updated":"2024-02-29 22:01:05",
+            "name":"diclofenac",
+            "quantity":10,
+            "sale_price":150.0,
+            "unit":"pack"
+        }
+        ```
+    * PUT Details:
+        + REQUIRED FORM DATA
+            - UPDATE Quantity with new purchase
+                - quantity: amount of new units purchased
+                - purchaseCost (optional): total purchase cost for new units
+                - description (optional): descriptionor detail associated with purchase
+            - UPDATE name
+                - name: change product name
+            - UPDATE cost price
+                - costPrice
+            - UPDATE sale price
+                - salePrice
+            - UPDATE image
+                - image
+            - UPDATE unit name
+                - unit: updates what a unit of a product is called
+            - UPDATE product category
+                - categoryId: the id of the category the product is to belong to
+            - UPDATE low stock Alert level
+                -lowStockLevel: new quantity aamount to warn that stock is low
+        + Accessible to all staff
+        + JSON RESPONSE
+            - STRUCTURE
+                {
+                    "message": contains a message noting all updates that carried out,
+                    "transaction": a object conatining details of any purchase added (empty otherwise)
+                }
+            - EXAMPLE
+            ```
+            {
+                "message":"paracetamol purchase succesfully added, Product sale price succesfully updated, Product category succesfully updated",
+                "transaction":{
+                    "Product_id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "products_in_store":10,
+                    "quantity":8,
+                    "total_cost":800.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"b5f58af5-bb9f-49cc-8083-060a75fcc63e",
+                    "transaction_time":"2024-02-29 22:39:10",
+                    "transaction_type":"Purchase"
+                }
+            }
+            ```
+    * DELETE Details
+        + REQUIRED FORM DATA
+            - REMOVE PRODUCT UNIT
+                - quantity: amount of new units sold or removed
+                - sale (default is autocalculated from sale price): total cost from saling units
+                - description (optional): description or detail associated with removal
+        + Accesible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "message":"4 unit of paracetamol removed",
+            "transaction":{
+                "Product_id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                "products_in_store":6,
+                "quantity":4,
+                "total_cost":480.0,
+                "transaction_done_by":"Emmanuel Adaja",
+                "transaction_id":"3589a8e1-4df3-4368-9528-92b432f0a929",
+                "transaction_time":"2024-02-29 23:08:09",
+                "transaction_type":"Sale"
+            }
+        }
+        ```
+
+#### api/v1/organizations/<organization_id>/products/search
+- Search the product list based on a keyword
+- **Methods**: GET
+- **AUTHENTICATION**: JWT
+    * GET Details:
+        + REQUIRED FORM DATA
+            - page (default = 1): page number to product view
+            - keyword: search parameter
+        + Acessible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "data":[
+                {
+                    "category_id":"629bb559-d9bb-4653-a527-e144de36f805",
+                    "cost_price":70.0,
+                    "id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "image":null,
+                    "last_updated":"2024-02-29 23:08:09",
+                    "name":"paracetamol",
+                    "quantity":6,
+                    "sale_price":120.0,
+                    "unit":"satchet"
+                }
+            ],
+            "next":null,
+            "page":1
+        }
+        ```
+
+#### api/v1/organizations/<organization_id>/products/category
+- Returns the products within a category
+- **Methods**: GET
+- **AUTHENTICATION**: JWT
+    * GET Details:
+        + REQUIRED FORM DATA
+            - page (default = 1): page number to product view
+            - categoryId: id of the category
+        + Accessible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "data":[
+                {
+                    "category_id":"629bb559-d9bb-4653-a527-e144de36f805",
+                    "cost_price":100.0,
+                    "id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                    "image":null,
+                    "last_updated":"2024-02-29 22:01:05",
+                    "name":"diclofenac",
+                    "quantity":10,
+                    "sale_price":150.0,
+                    "unit":"pack"
+                },
+                {
+                    "category_id":"629bb559-d9bb-4653-a527-e144de36f805",
+                    "cost_price":70.0,
+                    "id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "image":null,
+                    "last_updated":"2024-02-29 23:08:09",
+                    "name":"paracetamol",
+                    "quantity":6,
+                    "sale_price":120.0,
+                    "unit":"satchet"
+                }
+            ],
+            "next":null,
+            "page":0
+        }
+        ```
+
+#### api/v1/organizations/<organization_id>/sale
+- Performs a bulk sale of items
+- **Methods**: POST
+- **AUTHENTICATION**: JWT
+    * POST DETAILS
+        + REQUIRED JSON DATA
+            - STRUCTURE
+            {
+                "items": [
+                    {
+                        "id": id of product that was sold,
+                        "quantity": quantity of item sold
+                    },
+                    ....
+                ]
+            }
+        + Accessible to all staff members
+        + JSON RESPONSE
+        ```
+

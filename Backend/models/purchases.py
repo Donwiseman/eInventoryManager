@@ -11,7 +11,7 @@ class Purchase(Base):
        by the organization. """
     __tablename__ = "purchases"
     id = Column(String(60), primary_key=True)
-    date = Column(DateTime, nullable=False)
+    date = Column(DateTime(timezone=True), nullable=False)
     organization_id = Column(String(128), ForeignKey("organizations.id"),
                              nullable=False)
     done_by = Column(String(128), nullable=False)
@@ -34,3 +34,18 @@ class Purchase(Base):
         self.purchase_cost = kwargs.get("total_cost")
         self.total_items_in_store = kwargs.get("new_item_total")
         self.details = kwargs.get("details")
+
+    def transaction(self) -> dict:
+        """returns a dict representation of the transaction"""
+        date = self.organization.localize(self.date)
+        tr = {
+            "Product_id": self.item_id,
+            "transaction_id": self.id,
+            "transaction_time": date,
+            "transaction_type": "Purchase",
+            "quantity": self.quantity,
+            "total_cost": self.purchase_cost,
+            "products_in_store": self.total_items_in_store,
+            "transaction_done_by": self.done_by
+        }
+        return tr

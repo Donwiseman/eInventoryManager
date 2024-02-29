@@ -85,7 +85,8 @@ class Organization(Base):
         cat = {
             "organization_id": self.id,
             "name": name,
-            "description": description
+            "description": description,
+            "time": self.get_local_time()
         }
         category = Category(**cat)
         storage.add(category)
@@ -97,7 +98,7 @@ class Organization(Base):
         for asso in self.user_associations:
             if asso.user_id == user_id:
                 return asso.user_role
-        return "Not a user within this organization"
+        return None
 
     def get_local_time(self) -> datetime:
         """Returns the current local time used by the organization"""
@@ -110,3 +111,8 @@ class Organization(Base):
         desired_tz = pytz.timezone(self.time_zone)
         lt = self.created_at.replace(tzinfo=pytz.utc).astimezone(desired_tz)
         return lt.strftime('%Y-%m-%d %H:%M:%S')
+
+    def localize(self, time: datetime) -> str:
+        """Takes and aware time and return in time string format"""
+        desired_tz = pytz.timezone(self.time_zone)
+        return time.astimezone(desired_tz).strftime('%Y-%m-%d %H:%M:%S')
