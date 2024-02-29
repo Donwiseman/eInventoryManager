@@ -59,7 +59,7 @@ def organizations():
             "message": "Organization succesfully created",
             "name": org.name,
             "id": org.id,
-            "created_at": org.created_at,
+            "created_at": org.created_at_local_time_strf(),
             "image": org.image,
             "country": org.country
         }

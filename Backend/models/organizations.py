@@ -111,3 +111,8 @@ class Organization(Base):
         desired_tz = pytz.timezone(self.time_zone)
         lt = self.created_at.replace(tzinfo=pytz.utc).astimezone(desired_tz)
         return lt.strftime('%Y-%m-%d %H:%M:%S')
+
+    def localize(self, time: datetime) -> str:
+        """Takes and aware time and return in time string format"""
+        desired_tz = pytz.timezone(self.time_zone)
+        return time.astimezone(desired_tz).strftime('%Y-%m-%d %H:%M:%S')
