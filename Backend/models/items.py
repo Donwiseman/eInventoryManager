@@ -14,7 +14,7 @@ class Item(Base):
     name = Column(String(128), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
-    Category_id = Column(String(128), ForeignKey("categories.id"))
+    category_id = Column(String(128), ForeignKey("categories.id"))
     created_by = Column(String(128))
     image = Column(String(512))
     unit = Column(String(128))
@@ -91,6 +91,18 @@ class Item(Base):
         storage.add(new_sale)
         storage.save()
         return new_sale
-    
-    # def to_dict(self):
 
+    def to_dict(self):
+        """Returns a dict representation of object"""
+        item_dict = {
+            "id": self.id,
+            "name": self.name,
+            "quantity": self.quantity,
+            "unit": self.unit,
+            "cost_price": self.cost_price,
+            "sale_price": self.sale_price,
+            "image": self.image,
+            "category_id": self.category_id,
+            "last_updated": self.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+        }
+        return item_dict

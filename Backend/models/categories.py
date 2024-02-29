@@ -24,3 +24,4 @@ class Category(Base):
         self.name = kwargs.get("name", None)
         self.description = kwargs.get("description", None)
         self.organization_id = kwargs.get("organization_id", None)
+        self.created_at = kwargs.get("time")

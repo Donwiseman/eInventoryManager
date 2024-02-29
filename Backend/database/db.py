@@ -60,6 +60,15 @@ class Database:
         self.__session.add(new_user)
         self.__session.commit()
         return new_user
+    
+    def get_category_by_id(self, category_id: str) -> Category:
+        """"Retrieves the specified category object based on it's id"""
+        category = self.__session.query(Category).filter(Category.id ==
+                                                         category_id).first()
+        if category:
+            return category
+        else:
+            return None
 
     def get_user_by_id(self, user_id: str) -> User:
         """returns a user based on the id"""
@@ -120,6 +129,3 @@ class Database:
             return user
         else:
             return None
-        
-    def to_dict(self):
-        """Puts all data into a json format"""

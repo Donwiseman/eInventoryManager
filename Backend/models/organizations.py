@@ -85,7 +85,8 @@ class Organization(Base):
         cat = {
             "organization_id": self.id,
             "name": name,
-            "description": description
+            "description": description,
+            "time": self.get_local_time()
         }
         category = Category(**cat)
         storage.add(category)
@@ -97,7 +98,7 @@ class Organization(Base):
         for asso in self.user_associations:
             if asso.user_id == user_id:
                 return asso.user_role
-        return "Not a user within this organization"
+        return None
 
     def get_local_time(self) -> datetime:
         """Returns the current local time used by the organization"""

@@ -84,11 +84,11 @@ def organizations():
                 methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
 @jwt_required()
 def organization(organization_id):
-
+    """Handles the resource for a specific organization"""
     user_id = get_jwt_identity()
     if not user_id:
         return jsonify({"message": "Invalid token"}), 400
-    
+
     user = storage.get_user_by_id(user_id)
     if not user:
         return jsonify({"message": "Token is invalid"}), 400
@@ -99,7 +99,7 @@ def organization(organization_id):
     user_role = org.get_user_role(user_id)
     if not user_role:
         return jsonify({"message": "User not in Organization"}), 401
-    
+
     if request.method == 'GET':
         creator_name = "Craetor Account has been deleted"
         if org.creator:
@@ -154,7 +154,8 @@ def organization(organization_id):
         storage.delete(org)
         storage.save()
         return jsonify({"message": "Organization account is deleted"})
-    
+
+
 @app_look.route('/organizations/<organization_id>/sales', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def sales(organization_id):
@@ -187,21 +188,23 @@ def sales(organization_id):
             makeSale = get_item.remove(get_quantity, get_time, get_username, get_description)
             list_items.append(makeSale)
         return jsonify(list_items), 200
-    
+
+
 @app_look.route('/organizations/<organization_id>/products', methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def products(organization_id):
+    """Handles getting and creating producr resource"""
     user_id = get_jwt_identity()
     if not user_id:
         return jsonify({"message": "Invalid token"}), 400
-    
+
     get_usr = storage.get_user_by_id(user_id)
     if not get_usr:
         return jsonify({"message": "Invalid access"}), 400
     org_id = storage.get_org_by_id(organization_id)
     if not org_id:
         return jsonify({"message": "Invalid organization"}), 400
-    
+
     if request.method == "GET":
         all_list = []
         for count in org_id.items:
@@ -231,5 +234,249 @@ def products(organization_id):
             or not kwarg["quantity"]:
             return jsonify({"message": "Incomplete data"}), 400
         params = org_id.create_item(**kwarg)
-        return jsonify([params]), 200
-    
+        return jsonify(params)
+
+
+def sort_item_dict(item_dict):
+    """A sorting key function for item dictionary"""
+    return item_dict['name']
+
+
+@app_look.route('/organizations/<organization_id>/products/search',
+                methods=['POST'], strict_slashes=False)
+@jwt_required()
+def product_search(organization_id):
+    """Returns a list of items that match the keyword"""
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
+
+    user = storage.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message": "Token is invalid"}), 400
+
+    org = storage.get_org_by_id(organization_id)
+    if not org:
+        return jsonify({"message": "Organization dosent exist"}), 404
+    user_role = org.get_user_role(user_id)
+    if not user_role:
+        return jsonify({"message": "User not in Organization"}), 401
+
+    if request.method == "POST":
+        keyword = request.form.get('keyword')
+        page_sent = request.form.get('page')
+        try:
+            page = int(page_sent)
+        except Exception:
+            page = 0
+        search_items = []
+        if not keyword:
+            return jsonify({"message": "No search keyword provided"}), 400
+        for item in org.items:
+            if item.name.lower().startswith(keyword.lower()):
+                if item.obsolete:
+                    continue
+                search_items.append(item.to_dict())
+        search_items.sort(key=sort_item_dict)
+        resp = search_items
+        if len(search_items) > 36:
+            start = page * 36
+            end = start + 36
+            resp = search_items[start:end]
+        return jsonify(resp)
+
+
+@app_look.route('/organizations/<organization_id>/products/<product_id>',
+                methods=['GET', 'PUT', 'DELTE'], strict_slashes=False)
+@jwt_required()
+def product(organization_id, product_id):
+    """Gets and updates a particular product in the inventory"""
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
+
+    user = storage.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message": "Token is invalid"}), 400
+
+    org = storage.get_org_by_id(organization_id)
+    if not org:
+        return jsonify({"message": "Organization dosent exist"}), 404
+    user_role = org.get_user_role(user_id)
+    if not user_role:
+        return jsonify({"message": "User not in Organization"}), 401
+    item = storage.get_item_by_id(product_id)
+    if not item:
+        return jsonify({"message": "Invalid product id data"}), 400
+
+    if request.method == "PUT":
+        # for adding more quantities and updating other values.
+        msg = []
+        quantity_str = request.form.get('quantity')
+        purchase_cost_str = request.form.get('purchaseCost')
+        description = request.form.get('description')
+        name = request.form.get('name')
+        cost_price_str = request.form.get('costPrice')
+        sale_price_str = request.form.get('salePrice')
+        alert_level_str = request.form.get('lowStockLevel')
+        category_id = request.form.get('categoryId')
+        image = request.form.get('image')
+        unit = request.form.get('unit')
+
+        if quantity_str:
+            try:
+                quantity = int(quantity_str)
+            except Exception:
+                return jsonify({"message": "Invalid quntity data"}), 400
+            try:
+                purchase_cost = float(purchase_cost_str)
+            except Exception:
+                purchase_cost = 0
+            pur = item.add(quantity, purchase_cost, org.get_local_time(),
+                           description, user.full_name())
+            msg.append(f"{item.name} purchase succesfully added")
+        if name:
+            item.name = name
+            msg.append("Product name succesfully updated")
+        if cost_price_str:
+            try:
+                cost_price = float(cost_price_str)
+            except Exception:
+                return jsonify({"message": "Invalid costPrice data"}), 400
+            item.cost_price = cost_price
+            msg.append("Product cost price succesfully updated")
+        if sale_price_str:
+            try:
+                sale_price = float(sale_price_str)
+            except Exception:
+                return jsonify({"message": "Invalid salePrice data"}), 400
+            item.sale_price = sale_price
+            msg.append("Product sale price succesfully updated")
+        if alert_level_str:
+            try:
+                alert_level = int(alert_level_str)
+            except Exception:
+                return jsonify({"message": "Invalid low stock data"}), 400
+            item.alert_level = alert_level
+            msg.append("Product low stock warning updated")
+        if image:
+            item.image = image
+            msg.append("Product image updated")
+        if unit:
+            item.unit = unit
+            msg.append("Product's unit name succesfully updated")
+        if category_id:
+            item.category_id = category_id
+            msg.append("Product category succesfully updated")
+        storage.save()
+        return jsonify({"message": ", ".join(msg)})
+    if request.method == "GET":
+        return jsonify(item.to_dict())
+    if request.method == "DELETE":
+        quantity_str = request.form.get("quantity")
+        sale_str = request.form.get("sale")
+        description = request.form.get('description')
+        if quantity_str:
+            try:
+                quantity = int(quantity_str)
+            except Exception:
+                return jsonify({"message": "Invalid quntity data"}), 400
+            try:
+                sale = float(sale_str)
+            except Exception:
+                sale = 0
+            sale_tr = item.remove(quantity, org.get_local_time(),
+                                  user.full_name(), description, sale)
+            msg = f"{quantity} unit of {item.name} removed"
+            return jsonify({"message": msg})
+
+
+@app_look.route('/organizations/<organization_id>/products/category',
+                methods=['GET'], strict_slashes=False)
+@jwt_required()
+def proudct_category(organization_id):
+    """Returns products based on their organizaion"""
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
+
+    user = storage.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message": "Token is invalid"}), 400
+
+    org = storage.get_org_by_id(organization_id)
+    if not org:
+        return jsonify({"message": "Organization dosent exist"}), 404
+    user_role = org.get_user_role(user_id)
+    if not user_role:
+        return jsonify({"message": "User not in Organization"}), 401
+    if request.method == "GET":
+        category_id = request.form.get('categoryId')
+        page_sent = request.form.get('page')
+        category = storage.get_category_by_id(category_id)
+        if not category:
+            return jsonify({"message": "Incorrect category id"}), 400
+        cat_items = []
+        try:
+            page = int(page_sent)
+        except Exception:
+            page = 0
+        for item in category.items:
+            if item.obsolete == True:
+                continue
+            cat_items.append(item.to_dict())
+        cat_items.sort(key=sort_item_dict)
+        resp = cat_items
+        if len(cat_items) > 36:
+            start = page * 36
+            end = start + 36
+            resp = cat_items[start:end]
+        return jsonify(resp)
+
+
+@app_look.route('/organizations/<organization_id>/categories',
+                methods=['GET', 'POST'], strict_slashes=False)
+@jwt_required()
+def categories(organization_id):
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
+    user = storage.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message": "Token is invalid"}), 400
+
+    org = storage.get_org_by_id(organization_id)
+    if not org:
+        return jsonify({"message": "Organization dosent exist"}), 404
+    user_role = org.get_user_role(user_id)
+    if not user_role:
+        return jsonify({"message": "User not in Organization"}), 401
+
+    if request.method == "POST":
+        name = request.form.get('category')
+        description = request.form.get('description')
+        if not name:
+            return jsonify({"message": "Incomplete parameters"})
+        new_cat = org.add_category(name, description)
+        resp = {
+            "message": "New category created",
+            "category": {
+                "name": new_cat.name,
+                "id": new_cat.id,
+                "description": new_cat.description,
+                "created_at": new_cat.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }
+        return jsonify(resp)
+
+    if request.method == "GET":
+        resp = []
+        for cat in org.categories:
+            cat_detail = {
+                "name": cat.name,
+                "id": cat.id,
+                "description": cat.description,
+                "created_at": cat.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            resp.append(cat_detail)
+        return jsonify(resp)
