@@ -256,10 +256,10 @@ def products(organization_id):
             'sale_price': request.form.get('salePrice'),
             'unit': request.form.get('unit'),
             'quantity': request.form.get('quantity'),
-            'full_name': get_usr.full_name()
+            'user_name': get_usr.full_name()
         }
 
-        if not kwarg["name"] or not kwarg["cost_price"] or not kwarg["sale_price"] \
+        if not kwarg["name"] or not kwarg["sale_price"] \
             or not kwarg["quantity"]:
             return jsonify({"message": "Incomplete data"}), 400
         item = org_id.create_item(**kwarg)
