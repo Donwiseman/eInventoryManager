@@ -13,7 +13,8 @@ import os
 
 
 # db_uri = "sqlite:///a.db"
-db_uri = "postgresql+psycopg2://stan:Dinobi_11@localhost:5432/inventorydb"
+#db_uri = "postgresql+psycopg2://stan:Dinobi_11@localhost:5432/inventorydb"
+db_uri = "postgresql+psycopg2://inventory:password@localhost:5432/inventorydb"
 
 if os.getenv('DEBUG') == 'False':
     db_uri = (
