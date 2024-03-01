@@ -8,6 +8,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, \
 from smtplib import SMTPConnectError
 import pytz
 
+
 @app_look.route('/countries', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def supported_Countries():
@@ -28,7 +29,8 @@ def supported_Countries():
     return jsonify(countries)
 
 
-@app_look.route('/organizations', methods=['GET', 'POST'], strict_slashes=False)
+@app_look.route('/organizations', methods=['GET', 'POST'],
+                strict_slashes=False)
 @jwt_required()
 def organizations():
     """Handles the creating an organization by the user and retrieving
@@ -79,6 +81,7 @@ def organizations():
             "organizations": org
         }
         return jsonify(resp)
+
 
 @app_look.route('/organizations/<organization_id>',
                 methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
@@ -156,7 +159,8 @@ def organization(organization_id):
         return jsonify({"message": "Organization account is deleted"})
 
 
-@app_look.route('/organizations/<organization_id>/sales', methods=['GET', 'POST'], strict_slashes=False)
+@app_look.route('/organizations/<organization_id>/sales',
+                methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def sales(organization_id):
     """Gets and creates sales for an organization"""
@@ -169,12 +173,13 @@ def sales(organization_id):
     get_org = storage.get_org_by_id(organization_id)
     if not get_org:
         return jsonify({"message": "Invalid access"}), 400
-    
+
     if request.method == 'POST':
         org = request.get_json()
         items = org.get('items')
         if items is None or not isinstance(items, list):
-            return jsonify({"message": "Invalid or missing 'items' in the request JSON"}), 400
+            msg = "Invalid or missing 'items' in the request JSON"
+            return jsonify({"message": msg}), 400
         get_time = get_org.get_local_time()
         list_items = []
         for item in items:
@@ -192,7 +197,7 @@ def sales(organization_id):
             get_description = item.get('description')
             try:
                 make_sale = get_item.remove(get_quantity, get_time,
-                                           get_username, get_description)
+                                            get_username, get_description)
                 tr = make_sale.transaction()
                 tr["status"] = "succesful transaction"
                 list_items.append(tr)
@@ -203,14 +208,66 @@ def sales(organization_id):
                 }
                 list_items.append(failed_sale)
         return jsonify(list_items), 200
+    if request.method == "GET":
+        all_sales = get_org.sales
+        all_sales.sort(reverse=True, key=lambda p: p.date)
+        sales_list = [x.transaction() for x in all_sales]
+        page_sent = request.form.get('page')
+        try:
+            page = int(page_sent)
+        except Exception:
+            page = 1
+        resp = {
+            "page": page,
+            "data": sales_list,
+            "next": None
+        }
+        if len(sales_list) > 36:
+            start = (page - 1) * 36
+            end = start + 36
+            resp["data"] = sales[start:end]
+            resp["next"] = page + 1
+        return jsonify(resp)
 
 
-def sort_item_dict(item_dict):
-    """A sorting key function for item dictionary"""
-    return item_dict['name']
+@app_look.route('/organizations/<organization_id>/purchases',
+                methods=['GET'], strict_slashes=False)
+@jwt_required()
+def purchases(organization_id):
+    """Gets and creates sales for an organization"""
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 400
+    get_usr = storage.get_user_by_id(user_id)
+    if not get_usr:
+        return jsonify({"message": "Invalid access"}), 400
+    get_org = storage.get_org_by_id(organization_id)
+    if not get_org:
+        return jsonify({"message": "Invalid access"}), 400
+    if request.method == "GET":
+        all_purchases = get_org.purchases
+        all_purchases.sort(reverse=True, key=lambda p: p.date)
+        purchases_list = [x.transaction() for x in all_purchases]
+        page_sent = request.form.get('page')
+        try:
+            page = int(page_sent)
+        except Exception:
+            page = 1
+        resp = {
+            "page": page,
+            "data": purchases_list,
+            "next": None
+        }
+        if len(purchases_list) > 36:
+            start = (page - 1) * 36
+            end = start + 36
+            resp["data"] = purchases_list[start:end]
+            resp["next"] = page + 1
+        return jsonify(resp)
 
 
-@app_look.route('/organizations/<organization_id>/products', methods=['GET', 'POST'], strict_slashes=False)
+@app_look.route('/organizations/<organization_id>/products',
+                methods=['GET', 'POST'], strict_slashes=False)
 @jwt_required()
 def products(organization_id):
     """Handles getting and creating producr resource"""
@@ -233,10 +290,10 @@ def products(organization_id):
             page = 1
         all_list = []
         for item in org_id.items:
-            if item.obsolete == True:
+            if item.obsolete is True:
                 continue
             all_list.append(item.to_dict())
-        all_list.sort(key=sort_item_dict)
+        all_list.sort(key=lambda p: p['name'])
         resp = {
             "page": page,
             "data": all_list,
@@ -248,7 +305,7 @@ def products(organization_id):
             resp["data"] = all_list[start:end]
             resp["next"] = page + 1
         return jsonify(resp)
-    
+
     if request.method == 'POST':
         kwarg = {
             'name': request.form.get('name'),
@@ -262,7 +319,7 @@ def products(organization_id):
         }
 
         if not kwarg["name"] or not kwarg["sale_price"] \
-            or not kwarg["quantity"]:
+                or not kwarg["quantity"]:
             return jsonify({"message": "Incomplete data"}), 400
         item = org_id.create_item(**kwarg)
         return jsonify(item.to_dict())
@@ -303,7 +360,7 @@ def product_search(organization_id):
                 if item.obsolete:
                     continue
                 search_items.append(item.to_dict())
-        search_items.sort(key=sort_item_dict)
+        search_items.sort(key=lambda p: p['name'])
         resp = {
             "page": page,
             "data": search_items,
@@ -463,10 +520,10 @@ def proudct_category(organization_id):
         except Exception:
             page = 0
         for item in category.items:
-            if item.obsolete == True:
+            if item.obsolete is True:
                 continue
             cat_items.append(item.to_dict())
-        cat_items.sort(key=sort_item_dict)
+        cat_items.sort(key=lambda p: p['name'])
         resp = {
             "page": page,
             "data": cat_items,
