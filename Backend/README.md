@@ -325,7 +325,9 @@ This is the Backend application which manages the business logic and database of
                     "name":"paracetamol",
                     "quantity":2,
                     "sale_price":100.0,
-                    "unit":"satchet"
+                    "unit":"satchet",
+                    "recent_purchases":[],
+                    "recent_sales":[]
                 }
             ],
             "next":null,
@@ -353,7 +355,9 @@ This is the Backend application which manages the business logic and database of
             "name":"diclofenac",
             "quantity":10,
             "sale_price":150.0,
-            "unit":"pack"
+            "unit":"pack",
+            "recent_purchases":[],
+            "recent_sales":[]
         }
         ```
 
@@ -371,9 +375,34 @@ This is the Backend application which manages the business logic and database of
             "cost_price":100.0,
             "id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
             "image":null,
-            "last_updated":"2024-02-29 22:01:05",
+            "last_updated":"2024-03-01 11:19:08",
             "name":"diclofenac",
-            "quantity":10,
+            "quantity":9,
+            "recent_purchases":[
+                {
+                    "Product_id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                    "product_name":"diclofenac",
+                    "products_in_store":10,
+                    "quantity":10,"total_cost":1100.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"53c8b493-ed3c-4c95-9d73-ec2191e3d350",
+                    "transaction_time":"2024-02-29 22:01:05",
+                    "transaction_type":"Purchase"
+                }
+            ],
+            "recent_sales":[
+                {
+                    "Product_id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                    "product_name":"diclofenac",
+                    "products_in_store":10,
+                    "quantity":10,
+                    "total_cost":1100.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"53c8b493-ed3c-4c95-9d73-ec2191e3d350",
+                    "transaction_time":"2024-02-29 22:01:05",
+                    "transaction_type":"Purchase"
+                }
+            ],
             "sale_price":150.0,
             "unit":"pack"
         }
@@ -467,7 +496,9 @@ This is the Backend application which manages the business logic and database of
                     "name":"paracetamol",
                     "quantity":6,
                     "sale_price":120.0,
-                    "unit":"satchet"
+                    "unit":"satchet",
+                    "recent_purchases":[],
+                    "recent_sales":[]
                 }
             ],
             "next":null,
@@ -497,7 +528,32 @@ This is the Backend application which manages the business logic and database of
                     "name":"diclofenac",
                     "quantity":10,
                     "sale_price":150.0,
-                    "unit":"pack"
+                    "unit":"pack",
+                    "recent_purchases":[
+                        {
+                            "Product_id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                            "product_name":"diclofenac",
+                            "products_in_store":10,
+                            "quantity":10,"total_cost":1100.0,
+                            "transaction_done_by":"Emmanuel Adaja",
+                            "transaction_id":"53c8b493-ed3c-4c95-9d73-ec2191e3d350",
+                            "transaction_time":"2024-02-29 22:01:05",
+                            "transaction_type":"Purchase"
+                        }
+                    ],
+                    "recent_sales":[
+                        {
+                            "Product_id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                            "product_name":"diclofenac",
+                            "products_in_store":10,
+                            "quantity":10,
+                            "total_cost":1100.0,
+                            "transaction_done_by":"Emmanuel Adaja",
+                            "transaction_id":"53c8b493-ed3c-4c95-9d73-ec2191e3d350",
+                            "transaction_time":"2024-02-29 22:01:05",
+                            "transaction_type":"Purchase"
+                        }
+                    ]
                 },
                 {
                     "category_id":"629bb559-d9bb-4653-a527-e144de36f805",
@@ -508,7 +564,9 @@ This is the Backend application which manages the business logic and database of
                     "name":"paracetamol",
                     "quantity":6,
                     "sale_price":120.0,
-                    "unit":"satchet"
+                    "unit":"satchet",
+                    "recent_sales":[],
+                    "recent_purchases":[]
                 }
             ],
             "next":null,
@@ -516,9 +574,9 @@ This is the Backend application which manages the business logic and database of
         }
         ```
 
-#### api/v1/organizations/<organization_id>/sale
+#### api/v1/organizations/<organization_id>/sales
 - Performs a bulk sale of items
-- **Methods**: POST
+- **Methods**: POST, GET
 - **AUTHENTICATION**: JWT
     * POST DETAILS
         + REQUIRED JSON DATA
@@ -560,4 +618,100 @@ This is the Backend application which manages the business logic and database of
             }
         ]
         ```
+    * GET Details
+        + REQUIRED FORM DATA
+            - page (default = 1): page number to product view
+        + Accessible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "data":[
+                {
+                    "Product_id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "product_name":"paracetamol",
+                    "products_in_store":3,
+                    "quantity":3,
+                    "total_cost":360.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"95747a74-e0f6-473c-a637-2edc5232c4fc",
+                    "transaction_time":"2024-03-01 11:19:08",
+                    "transaction_type":"Sale"
+                },
+                {
+                    "Product_id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                    "product_name":"diclofenac",
+                    "products_in_store":9,
+                    "quantity":1,
+                    "total_cost":150.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"fd624f64-3d94-461e-8572-3af359958b98",
+                    "transaction_time":"2024-03-01 11:19:08",
+                    "transaction_type":"Sale"
+                },
+                {
+                    "Product_id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "product_name":"paracetamol",
+                    "products_in_store":6,
+                    "quantity":4,
+                    "total_cost":480.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"3589a8e1-4df3-4368-9528-92b432f0a929",
+                    "transaction_time":"2024-02-29 23:08:09",
+                    "transaction_type":"Sale"
+                }
+            ],
+            "next":null,
+            "page":1
+        }
+        ```
 
+#### api/v1/organizations/<organization_id>/purchases
+- Retrives purchases mae by the organization
+- **Methods**: GET
+- **AUTHENTICATION**: JWT
+    * GET DETAILS
+        + REQUIRED FORM DATA
+            - page (default = 1): page number to product view
+        + Accessible to all staff
+        + JSON RESPONSE
+        ```
+        {
+            "data":[
+                {
+                    "Product_id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "product_name":"paracetamol",
+                    "products_in_store":10,
+                    "quantity":8,
+                    "total_cost":800.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"b5f58af5-bb9f-49cc-8083-060a75fcc63e",
+                    "transaction_time":"2024-02-29 22:39:10",
+                    "transaction_type":"Purchase"
+                },
+                {
+                    "Product_id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                    "product_name":"diclofenac",
+                    "products_in_store":10,
+                    "quantity":10,
+                    "total_cost":1100.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"53c8b493-ed3c-4c95-9d73-ec2191e3d350",
+                    "transaction_time":"2024-02-29 22:01:05",
+                    "transaction_type":"Purchase"
+                },
+                {
+                    "Product_id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                    "product_name":"paracetamol",
+                    "products_in_store":2,
+                    "quantity":2,
+                    "total_cost":0.0,
+                    "transaction_done_by":"Emmanuel Adaja",
+                    "transaction_id":"196df353-6859-468a-9e14-b09d2e9be506",
+                    "transaction_time":"2024-02-29 20:30:24",
+                    "transaction_type":"Purchase"
+                }
+            ],
+            "next":null,
+            "page":1
+        }
+        ```
