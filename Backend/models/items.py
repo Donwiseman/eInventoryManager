@@ -93,6 +93,24 @@ class Item(Base):
         storage.save()
         return new_sale
 
+    def recent_purchase(self) -> list:
+        """Returns a list containing last 10 recent purchase transactions"""
+        pur = []
+        purchases = self.purchase_history
+        purchases.sort(reverse=True, key=lambda p:p.date)
+        for tr in purchases:
+            pur.append(tr.transaction())
+        return pur[:10]
+    
+    def recent_sale(self) -> list:
+        """Returns a list containing last 10 recent purchase transactions"""
+        sal = []
+        sales = self.purchase_history
+        sales.sort(reverse=True, key=lambda p:p.date)
+        for tr in sales:
+            sal.append(tr.transaction())
+        return sal[:10]
+
     def to_dict(self):
         """Returns a dict representation of object"""
         date = self.organization.localize(self.updated_at)
@@ -105,6 +123,8 @@ class Item(Base):
             "sale_price": self.sale_price,
             "image": self.image,
             "category_id": self.category_id,
-            "last_updated": date
+            "last_updated": date,
+            "recent_purchases": self.recent_purchase(),
+            "recent_sales": self.recent_sale()
         }
         return item_dict

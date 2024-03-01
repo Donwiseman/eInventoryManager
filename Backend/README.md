@@ -535,4 +535,29 @@ This is the Backend application which manages the business logic and database of
         + Accessible to all staff members
         + JSON RESPONSE
         ```
+        [
+            {
+                "Product_id":"491e1810-39b6-4501-920a-eea9117dcee9",
+                "products_in_store":3,
+                "quantity":3,
+                "status":"succesful transaction",
+                "total_cost":360.0,
+                "transaction_done_by":"Emmanuel Adaja",
+                "transaction_id":"95747a74-e0f6-473c-a637-2edc5232c4fc",
+                "transaction_time":"2024-03-01 11:19:08",
+                "transaction_type":"Sale"
+            },
+            {
+                "Product_id":"93bdb5fd-e4ca-4ce1-b089-70bc12b8cdbb",
+                "products_in_store":9,
+                "quantity":1,
+                "status":"succesful transaction",
+                "total_cost":150.0,
+                "transaction_done_by":"Emmanuel Adaja",
+                "transaction_id":"fd624f64-3d94-461e-8572-3af359958b98",
+                "transaction_time":"2024-03-01 11:19:08",
+                "transaction_type":"Sale"
+            }
+        ]
+        ```
 
