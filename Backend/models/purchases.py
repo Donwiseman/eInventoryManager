@@ -39,6 +39,7 @@ class Purchase(Base):
         """returns a dict representation of the transaction"""
         date = self.organization.localize(self.date)
         tr = {
+            "product_name": self.item.name,
             "Product_id": self.item_id,
             "transaction_id": self.id,
             "transaction_time": date,
