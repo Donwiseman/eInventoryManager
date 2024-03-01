@@ -13,7 +13,7 @@ import os
 
 
 # db_uri = "sqlite:///a.db"
-#db_uri = "postgresql+psycopg2://stan:Dinobi_11@localhost:5432/inventorydb"
+# db_uri = "postgresql+psycopg2://stan:Dinobi_11@localhost:5432/inventorydb"
 db_uri = "postgresql+psycopg2://inventory:password@localhost:5432/inventorydb"
 
 if os.getenv('DEBUG') == 'False':
@@ -61,7 +61,7 @@ class Database:
         self.__session.add(new_user)
         self.__session.commit()
         return new_user
-    
+
     def get_category_by_id(self, category_id: str) -> Category:
         """"Retrieves the specified category object based on it's id"""
         category = self.__session.query(Category).filter(Category.id ==
@@ -88,7 +88,7 @@ class Database:
         self.__session.add(asso)
         self.__session.commit()
         return org
-    
+
     def get_item_by_id(self, item_id: str) -> Item:
         """returns the item based on the id"""
         item = self.__session.query(Item).filter(Item.id == item_id).first()

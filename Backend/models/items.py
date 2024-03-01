@@ -97,16 +97,16 @@ class Item(Base):
         """Returns a list containing last 10 recent purchase transactions"""
         pur = []
         purchases = self.purchase_history
-        purchases.sort(reverse=True, key=lambda p:p.date)
+        purchases.sort(reverse=True, key=lambda p: p.date)
         for tr in purchases:
             pur.append(tr.transaction())
         return pur[:10]
-    
+
     def recent_sale(self) -> list:
         """Returns a list containing last 10 recent purchase transactions"""
         sal = []
         sales = self.purchase_history
-        sales.sort(reverse=True, key=lambda p:p.date)
+        sales.sort(reverse=True, key=lambda p: p.date)
         for tr in sales:
             sal.append(tr.transaction())
         return sal[:10]

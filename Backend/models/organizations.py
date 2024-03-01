@@ -105,7 +105,7 @@ class Organization(Base):
         desired_tz = pytz.timezone(self.time_zone)
         date_now = datetime.utcnow()
         return date_now.replace(tzinfo=pytz.utc).astimezone(desired_tz)
-    
+
     def created_at_local_time_strf(self) -> str:
         """Returns the time of creation based on timezone"""
         desired_tz = pytz.timezone(self.time_zone)

@@ -4,6 +4,7 @@ import random
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+
 class Email:
     def __init__(self) -> None:
         self.verify_code = None

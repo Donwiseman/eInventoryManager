@@ -8,6 +8,8 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required
 from smtplib import SMTPConnectError, SMTPRecipientsRefused
 Mail = Email()
+
+
 @app_look.route('/signup', methods=['POST'], strict_slashes=False)
 def reg_users():
     """Registers a user"""
@@ -57,6 +59,8 @@ def reg_users():
         "organizations": org
     }
     return jsonify(resp), 200
+
+
 @app_look.route('/login', methods=['POST'], strict_slashes=False)
 def login():
     """Logs the user to the site"""
@@ -87,6 +91,8 @@ def login():
         "organizations": org
     }
     return jsonify(resp), 200
+
+
 @app_look.route('/reset', methods=['POST'], strict_slashes=False)
 def password_reset():
     """Resets a given user password with valid token"""
@@ -113,6 +119,8 @@ def password_reset():
     user.token_expiry = None
     user.active_token = None
     return jsonify({"message": "User password has been updated"})
+
+
 @app_look.route('/verify', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def get_code():
@@ -144,6 +152,8 @@ def get_code():
     user.token_expiry = None
     storage.save()
     return jsonify({"message": "Email Verified"}), 200
+
+
 @app_look.route('/token', methods=['POST'], strict_slashes=False)
 def send_code():
     """Resends the verification code"""
