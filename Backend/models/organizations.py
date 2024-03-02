@@ -1,9 +1,10 @@
 """This defines the Organization class and it's mappingss to the DB"""
 from . import Base
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 import uuid
+import pytz
 
 
 class Organization(Base):
@@ -18,26 +19,34 @@ class Organization(Base):
     description = Column(String(128))
     time_zone = Column(String(128), nullable=False)
     mobile = Column(String(60))
+    mobile_verified = Column(Boolean, default=False)
+    active_token = Column(String(128))
+    token_expiry = Column(DateTime)
     image = Column(String(512))
     creator = relationship("User", back_populates='org_created')
-    users = relationship("User", secondary='org_user_association',
-                         viewonly=False, back_populates="organizations")
-    categories = relationship("Category", back_populates="organization")
-    items = relationship("Item", back_populates="organization")
-    purchases = relationship("Purchase", back_populates="organization")
-    sales = relationship("Sale", back_populates="organization")
+    user_associations = relationship("OrgUserAssociation",
+                                     back_populates="organization",
+                                     cascade='delete')
+    categories = relationship("Category", back_populates="organization",
+                              cascade='delete')
+    items = relationship("Item", back_populates="organization",
+                         cascade='delete')
+    purchases = relationship("Purchase", back_populates="organization",
+                             cascade='delete')
+    sales = relationship("Sale", back_populates="organization",
+                         cascade='delete')
 
     def __init__(self, **kwargs):
         """Initializes the class"""
         self.id = str(uuid.uuid4())
-        self.name = kwargs.get("name", None)
-        self.country = kwargs.get("country", None)
-        self.address = kwargs.get("address", None)
-        self.creator_id = kwargs.get("user_id", None)
-        self.description = kwargs.get("description", None)
-        self.time_zone = kwargs.get("timezone", None)
-        self.mobile = kwargs.get("mobile", None)
-        self.image = kwargs.get("image", None)
+        self.name = kwargs.get("name")
+        self.country = kwargs.get("country")
+        self.address = kwargs.get("address")
+        self.creator_id = kwargs.get("user_id")
+        self.description = kwargs.get("description")
+        self.time_zone = kwargs.get("timezone")
+        self.mobile = kwargs.get("mobile")
+        self.image = kwargs.get("image")
 
     def create_item(self, **kwargs):
         """Adds an item to the inventory"""
@@ -48,7 +57,7 @@ class Organization(Base):
         new_item = Item(**kwargs)
         storage.add(new_item)
         trans = {
-            "date": datetime.utcnow(),
+            "date": self.get_local_time(),
             "user_name": kwargs.get("user_name"),
             "organization_id": self.id,
             "item_id": new_item.id,
@@ -76,9 +85,34 @@ class Organization(Base):
         cat = {
             "organization_id": self.id,
             "name": name,
-            "description": description
+            "description": description,
+            "time": self.get_local_time()
         }
         category = Category(**cat)
         storage.add(category)
         storage.save()
         return category
+
+    def get_user_role(self, user_id) -> str:
+        """Gets the role of a given user within the organization"""
+        for asso in self.user_associations:
+            if asso.user_id == user_id:
+                return asso.user_role
+        return None
+
+    def get_local_time(self) -> datetime:
+        """Returns the current local time used by the organization"""
+        desired_tz = pytz.timezone(self.time_zone)
+        date_now = datetime.utcnow()
+        return date_now.replace(tzinfo=pytz.utc).astimezone(desired_tz)
+
+    def created_at_local_time_strf(self) -> str:
+        """Returns the time of creation based on timezone"""
+        desired_tz = pytz.timezone(self.time_zone)
+        lt = self.created_at.replace(tzinfo=pytz.utc).astimezone(desired_tz)
+        return lt.strftime('%Y-%m-%d %H:%M:%S')
+
+    def localize(self, time: datetime) -> str:
+        """Takes and aware time and return in time string format"""
+        desired_tz = pytz.timezone(self.time_zone)
+        return time.astimezone(desired_tz).strftime('%Y-%m-%d %H:%M:%S')

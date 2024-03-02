@@ -12,9 +12,9 @@ class Item(Base):
     __tablename__ = "items"
     id = Column(String(60), primary_key=True)
     name = Column(String(128), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
-    Category_id = Column(String(128), ForeignKey("categories.id"))
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    category_id = Column(String(128), ForeignKey("categories.id"))
     created_by = Column(String(128))
     image = Column(String(512))
     unit = Column(String(128))
@@ -26,8 +26,7 @@ class Item(Base):
     organization_id = Column(String(128), ForeignKey("organizations.id"),
                              nullable=False)
     obsolete = Column(Boolean, default=False)
-    organization = relationship("Organization", back_populates="items",
-                                cascade="delete")
+    organization = relationship("Organization", back_populates="items")
     category = relationship("Category", back_populates="items")
     purchase_history = relationship("Purchase", back_populates="item")
     sale_history = relationship("Sale", back_populates="item")
@@ -36,7 +35,7 @@ class Item(Base):
         """Initializes the class """
         self.id = str(uuid.uuid4())
         self.name = kwargs.get("name", None)
-        self.Category_id = kwargs.get("category_id", None)
+        self.category_id = kwargs.get("category_id", None)
         self.created_by = kwargs.get("user_name", None)
         self.image = kwargs.get("image", None)
         self.unit = kwargs.get("unit", None)
@@ -48,11 +47,11 @@ class Item(Base):
 
     def add(self, quantity: int, purchase_cost: float, time, description: str,
             user_name):
-        """Adds more unit of an item"""
+        """Adds more unit of an item and returns a purchase object"""
         from database import storage
         from .purchases import Purchase
         self.quantity += quantity
-        storage.__session.add(self)
+        self.updated_at = time
         trans = {
             "date": time,
             "user_name": user_name,
@@ -70,7 +69,7 @@ class Item(Base):
 
     def remove(self, quantity: int, time, user_name: str,
                description: str = None, sale: float = None):
-        """removes some unit of an item"""
+        """removes some unit of an item and returns a sale object"""
         from database import storage
         from .sales import Sale
         if self.quantity < quantity:
@@ -88,7 +87,44 @@ class Item(Base):
             "total_cost": sale,
             "new_item_total": self.quantity
         }
+        self.updated_at = time
         new_sale = Sale(**trans)
         storage.add(new_sale)
         storage.save()
         return new_sale
+
+    def recent_purchase(self) -> list:
+        """Returns a list containing last 10 recent purchase transactions"""
+        pur = []
+        purchases = self.purchase_history
+        purchases.sort(reverse=True, key=lambda p: p.date)
+        for tr in purchases:
+            pur.append(tr.transaction())
+        return pur[:10]
+
+    def recent_sale(self) -> list:
+        """Returns a list containing last 10 recent purchase transactions"""
+        sal = []
+        sales = self.purchase_history
+        sales.sort(reverse=True, key=lambda p: p.date)
+        for tr in sales:
+            sal.append(tr.transaction())
+        return sal[:10]
+
+    def to_dict(self):
+        """Returns a dict representation of object"""
+        date = self.organization.localize(self.updated_at)
+        item_dict = {
+            "id": self.id,
+            "name": self.name,
+            "quantity": self.quantity,
+            "unit": self.unit,
+            "cost_price": self.cost_price,
+            "sale_price": self.sale_price,
+            "image": self.image,
+            "category_id": self.category_id,
+            "last_updated": date,
+            "recent_purchases": self.recent_purchase(),
+            "recent_sales": self.recent_sale()
+        }
+        return item_dict

@@ -11,12 +11,11 @@ class Category(Base):
     __tablename__ = "categories"
     id = Column(String(60), primary_key=True)
     name = Column(String(128), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True))
     description = Column(String(128))
     organization_id = Column(String(128), ForeignKey("organizations.id"),
                              nullable=False)
-    organization = relationship("Organization", back_populates="categories",
-                                cascade="delete")
+    organization = relationship("Organization", back_populates="categories")
     items = relationship("Item", back_populates="category")
 
     def __init__(self, **kwargs):
@@ -25,3 +24,4 @@ class Category(Base):
         self.name = kwargs.get("name", None)
         self.description = kwargs.get("description", None)
         self.organization_id = kwargs.get("organization_id", None)
+        self.created_at = kwargs.get("time")
