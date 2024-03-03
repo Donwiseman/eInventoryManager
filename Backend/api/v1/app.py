@@ -5,6 +5,7 @@ from database import storage
 from flask_cors import CORS
 from api.v1.views import app_look
 from flask_jwt_extended import JWTManager
+from datetime import datetime
 import os
 
 
@@ -17,7 +18,7 @@ else:
     app.config["DEBUG"] = True
 
 
-# app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 jwt = JWTManager(app)
 app.register_blueprint(app_look)
