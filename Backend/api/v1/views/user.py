@@ -34,7 +34,7 @@ def user():
             org_detail = {
                 "name": organization.name,
                 "id": organization.id,
-                "created_at": organization.created_at
+                "created_at": organization.created_at_local_time_strf()
             }
             created_org.append(org_detail)
         user_dict = {
